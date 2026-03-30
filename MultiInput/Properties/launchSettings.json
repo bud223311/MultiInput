@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MultiInput": {
+      "commandName": "Project",
+      "commandLineArgs": "1234567 sender 0 0"
+    }
+  }
+}
