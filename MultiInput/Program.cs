@@ -3,59 +3,68 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.IO;
+
 namespace ConsoleApp1;
 
 internal class Server
 {
-    [DllImport("user32.dll")]
-    static extern bool PostMessage(HandleRef hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
+    //[DllImport("user32.dll")]
+    //static extern bool PostMessage(HandleRef hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+    
     internal const bool Debug = true;
-    private static bool NoStartup = false;
     private static uint hwnd = 0;
+    private static string RunTime = string.Format("{0:D} {0:T}", System.DateTime.Now);
+    private static readonly string LogPath = Path.Combine(AppContext.BaseDirectory, $"log {RunTime.Replace(':', '.')}.txt");
+    
 
-
+    //Launch args validation and handling
     public static void Main(string[] args)
     {
-
-        hwnd = uint.Parse(args[0]);
-        string LaunchType = args[1];
-        string IP = args[2];
-        int? Port = int.Parse(args[3]);
-
+        Console.WriteLine(LogPath);
 
         if (args.Length == 0)
         {
             Console.WriteLine("No arguments found...");
+            throw new Exception("No arguments provided. Please use the attached executable.");
         }
-        else
+
+        hwnd = uint.Parse(args[0]);
+        string LaunchType = args[1];
+        string IP = args[2];
+        int Port = int.Parse(args[3]);
+
+        if (!Regex.IsMatch(hwnd.ToString(), "[0-9]{6,7}"))
         {
-            if (!Regex.IsMatch(hwnd.ToString(), "[0-9]{6,7}"))
-            {
-                Console.WriteLine("HWND (" + hwnd + ") specified, connecting to AHK...");
-            }
+            Console.WriteLine($"HWND ({hwnd}) specified, connecting to AHK...");
         }
+        //add hwnd validity check unless in debug
+
+
+        
+
+
+        
+
+
         switch (LaunchType)
         {
             case "receiver":
-                ServerListener((int)Port);
+                ServerListener(Port);
                 break;
             case "sender":
-                ServerSender(IP, (int)Port);
+                ServerSender(IP, Port);
                 break;
         }
     }
 
 
-
-
-
-
-
-
-    //Start TCP server listener
+    //Start TCP client (Receiver)
     public static void ServerListener(int Port)
     {
+        //File.OpenHandle(LogFile, FileMode.Open, FileAccess.Write, FileShare.Read);
+        FileStream fs = new FileStream(LogPath, FileMode.Create);
+
         TcpListener server = new(IPAddress.Any, Port);
         server.Start();
         Console.WriteLine("Listening...");
@@ -77,14 +86,25 @@ internal class Server
     //Handle received TCP data from server
     private static void Recieved(string data, TcpClient client, NetworkStream stream)
     {
+
+
+
+
+
+
+
+        /*
         if (data.Length != 5)
         {
             client.Close();
             return;
         }
+
+
+
         //PostMessage(hwnd, data,0,0);
 
-        /*
+        
         if (Debug)
         {
             if (NoStartup)
@@ -100,7 +120,7 @@ internal class Server
     }
 
 
-    //Handle sending TCP data to client
+    //Start TCP server (Sender)
     public static void ServerSender(string IP, int Port)
     {
         Console.WriteLine("Ready to send data.");

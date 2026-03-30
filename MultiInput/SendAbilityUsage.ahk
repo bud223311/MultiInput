@@ -32,12 +32,13 @@ StartSendData(*)
 ReceiveToggle.OnEvent('Click',StartReceiveData)
 StartReceiveData(*)
 {
+    MainGUI.Submit(false)
     BtnText := ReceiveToggle.Text
     switch BtnText{
         case "Receive Data":
             ReceiveToggle.Text := ("Stop Receiving")
             SendToggle.Opt('Disabled')
-            StartServer(MultiInputExe, "receiver")
+            StartServer(MultiInputExe, "receiver",'', SendPort.Value)
 
         case "Stop Receiving":
             ReceiveToggle.Text := ("Receive Data")
@@ -48,15 +49,11 @@ StartReceiveData(*)
 
 MainGUI.Show('h80 w200')
 
-StartServer(dir, LaunchType, IP?, Port?)
+StartServer(dir, LaunchType, IP, Port)
 {
-    if !IsSet(IP)
+    if IP = ''
     {
         IP := "null"
-    }
-    if !IsSet(Port)
-    {
-        Port := "null"
     }
     Run(dir A_Space A_ScriptHwnd A_Space LaunchType A_Space IP A_Space Port ,,,&PID)
     global PID
@@ -64,12 +61,10 @@ StartServer(dir, LaunchType, IP?, Port?)
     if LaunchType = "sender"{
         ihlistener.Start
         while ProcessExist(PID) && LaunchType = "sender"{
-            if !ihlistener.InProgress
-            {
-                LastInput.Text := ihlistener.Input
-                SendInput(ihlistener.Input)
-                ihlistener.Start
-            }
+            ihlistener.Wait()
+            LastInput.Text := ihlistener.Input
+            SendInput(ihlistener.Input)
+            ihlistener.Start
 
 
         }
@@ -78,8 +73,11 @@ StartServer(dir, LaunchType, IP?, Port?)
 
 }
 
+OnExit(MainClose)
 
 MainClose(*){
-    ProcessClose('ahk_pid ' PID)
+    if IsSet(PID){
+        ProcessClose('ahk_pid ' PID)
+    }
     ExitApp
 }
