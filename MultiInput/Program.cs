@@ -55,7 +55,7 @@ internal class Server
 
 
     //Start TCP client (Receiver)
-    private static void ServerListener(int Port)
+    public static void ServerListener(int Port)
     {
         TcpListener server = new(IPAddress.Any, Port);
 
