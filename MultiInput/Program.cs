@@ -55,11 +55,11 @@ internal class Server
 
 
     //Start TCP client (Receiver)
-    public static void ServerListener(int Port)
+    private static void ServerListener(int Port)
     {
         TcpListener server = new(IPAddress.Any, Port);
 
-        FileStream fs = new FileStream(LogPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read, bufferSize: 1024);
+        FileStream fs = new(LogPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read, bufferSize: 8, useAsync: true);
         {
             server.Start();
             Console.WriteLine($"Waiting for connection on port: {Port}");
@@ -69,17 +69,21 @@ internal class Server
                 TcpClient client = server.AcceptTcpClient();
                 NetworkStream stream = client.GetStream();
 
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[8];
                 int bytesRead = stream.Read(buffer, 0, buffer.Length);
                 
                 string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                byte[] message = new byte[data.Length];
+                for (int i = 0; i < message.Length; i++)
+                {
+                    message[i] = buffer[i];
+                }
+                
                 Console.WriteLine("Received: " + data);
                 
-                fs.Write(buffer, 0, buffer.Length);
-
-
+                fs.Write(message, 0, message.Length);
+                Console.WriteLine($"{buffer[0]}");
                 client.Close();
-                
                 //Recieved(data, client, stream);
             }
         }
@@ -119,7 +123,7 @@ internal class Server
             string? key = Console.ReadLine();
             if (key == null) return;
 
-            TcpClient client = new TcpClient(IP, Port);
+            TcpClient client = new(IP, Port);
             NetworkStream stream = client.GetStream();
             
             byte[] data = Encoding.UTF8.GetBytes(key);
