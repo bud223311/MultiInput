@@ -14,7 +14,7 @@ internal class Server
     
     internal const bool Debug = true;
     private static uint hwnd = 0;
-    private static string RunTime = string.Format("{0:D} {0:T}", System.DateTime.Now);
+    private static string RunTime = string.Format("{0:D}", System.DateTime.Now);
     private static readonly string LogPath = Path.Combine(AppContext.BaseDirectory, $"log {RunTime.Replace(':', '.')}.txt");
     
 
@@ -60,51 +60,51 @@ internal class Server
 
 
     //Start TCP client (Receiver)
-    public static void ServerListener(int Port)
+    public static async void ServerListener(int Port)
     {
-        //File.OpenHandle(LogFile, FileMode.Open, FileAccess.Write, FileShare.Read);
-        FileStream fs = new FileStream(LogPath, FileMode.Create);
+
 
         TcpListener server = new(IPAddress.Any, Port);
-        server.Start();
-        Console.WriteLine("Listening...");
 
-        while (true)
+        FileStream fs = new FileStream(LogPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read, bufferSize: 4096, useAsync: true);
         {
-            TcpClient client = server.AcceptTcpClient();
-            NetworkStream stream = client.GetStream();
+            server.Start();
+            Console.WriteLine($"Waiting for connection on port: {Port}");
 
-            byte[] buffer = new byte[1024];
-            int bytesRead = stream.Read(buffer, 0, buffer.Length);
 
-            string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            Console.WriteLine("Received: " + data);
-            Recieved(data, client, stream);
+
+            while (true)
+            {
+                //byte[] streamdata = System.Text.Encoding.UTF8.GetBytes("Streamed asdasdcontent.");
+
+                
+                //Console.WriteLine(System.Text.Encoding.UTF8.GetString(streamdata));
+
+                TcpClient client = server.AcceptTcpClient();
+                NetworkStream stream = client.GetStream();
+
+                byte[] buffer = new byte[1024];
+                int bytesRead = stream.Read(buffer, 0, buffer.Length);
+
+                string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                Console.WriteLine("Received: " + data);
+                await fs.WriteAsync(buffer, 0, buffer.Length);
+                //Recieved(data, client, stream);
+            }
         }
     }
 
     //Handle received TCP data from server
+    /*
     private static void Recieved(string data, TcpClient client, NetworkStream stream)
     {
-
-
-
-
-
-
-
-        /*
         if (data.Length != 5)
         {
             client.Close();
             return;
         }
-
-
-
         //PostMessage(hwnd, data,0,0);
 
-        
         if (Debug)
         {
             if (NoStartup)
@@ -112,13 +112,11 @@ internal class Server
                 //Broken LogFile($"{data}     RequestFrom: {client.Client.RemoteEndPoint}");
                 return;
             }
-
             //Broken  LogFile($"{data} {StartupArguments[0]}    RequestFrom: {client.Client.RemoteEndPoint}");
             //SendDataToAhk(HWND, data);
         }
-        */
     }
-
+    */
 
     //Start TCP server (Sender)
     public static void ServerSender(string IP, int Port)
