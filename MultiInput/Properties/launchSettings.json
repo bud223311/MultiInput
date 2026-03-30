@@ -2,7 +2,7 @@
   "profiles": {
     "MultiInput": {
       "commandName": "Project",
-      "commandLineArgs": "1234567 sender 0 0"
+      "commandLineArgs": "1234567 sender 0 a"
     }
   }
 }

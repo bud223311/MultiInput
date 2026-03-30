@@ -1,8 +1,6 @@
-﻿using System.Diagnostics;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 namespace ConsoleApp1;
@@ -17,41 +15,34 @@ internal class Server
     private static uint hwnd = 0;
 
 
-    //Assign launch arguments for sender/receiver
     public static void Main(string[] args)
     {
-       hwnd = uint.Parse(args[0]);
-        
+
+        hwnd = uint.Parse(args[0]);
+        string LaunchType = args[1];
+        string IP = args[2];
+        int? Port = int.Parse(args[3]);
+
+
         if (args.Length == 0)
         {
             Console.WriteLine("No arguments found...");
         }
         else
         {
-            if (Regex.IsMatch(args[0], "[0-9]{6,7}"))
+            if (!Regex.IsMatch(hwnd.ToString(), "[0-9]{6,7}"))
             {
                 Console.WriteLine("HWND (" + hwnd + ") specified, connecting to AHK...");
             }
         }
-        try
+        switch (LaunchType)
         {
-            switch (args[1])
-            {
-                case "receiver":
-                    ServerListener();
-                    break;
-                case "sender":
-                    if (Regex.IsMatch(args[3], "[0-9]{0,5}"))
-                    {
-                        ServerSender(args[2], args[3]);
-                    }
-                    
-                    break;
-            }
-        }
-        catch
-        {
-            Console.WriteLine("This application must be ran using the GUI utility that is included.");
+            case "receiver":
+                ServerListener((int)Port);
+                break;
+            case "sender":
+                ServerSender(IP, (int)Port);
+                break;
         }
     }
 
@@ -63,9 +54,9 @@ internal class Server
 
 
     //Start TCP server listener
-    public static void ServerListener()
+    public static void ServerListener(int Port)
     {
-        TcpListener server = new(IPAddress.Any, 6567);
+        TcpListener server = new(IPAddress.Any, Port);
         server.Start();
         Console.WriteLine("Listening...");
 
@@ -92,7 +83,7 @@ internal class Server
             return;
         }
         //PostMessage(hwnd, data,0,0);
-        
+
         /*
         if (Debug)
         {
@@ -110,7 +101,7 @@ internal class Server
 
 
     //Handle sending TCP data to client
-    public static void ServerSender(string ip, string port)
+    public static void ServerSender(string IP, int Port)
     {
         Console.WriteLine("Ready to send data.");
         while (true)
@@ -118,7 +109,7 @@ internal class Server
             string key = "Console.ReadLine()";
             Console.WriteLine(key);
 
-            TcpClient client = new TcpClient(ip, int.Parse(port));
+            TcpClient client = new TcpClient(IP, Port);
             NetworkStream stream = client.GetStream();
 
             byte[] data = Encoding.UTF8.GetBytes(key);
@@ -156,3 +147,19 @@ internal class Server
 
     }
 }
+/*
+ TODO:
+    Send inputs from ahk to program
+    Log sent/received inputs
+    Make ahk script read logs data for inputs
+    Validate IP formatting & connectivity
+    Verify HWND to be ahk script
+    Connection authentication for recipient
+    Connection validation for sender + receiver
+    Store historical IP + Ports
+    Config to hide plaintext IP's
+    Configurable rate limit
+    GUI clean-up & feature additions
+    Hotkeys for enable/disable (+ quick exit)
+    
+ */
