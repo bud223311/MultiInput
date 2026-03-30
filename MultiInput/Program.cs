@@ -106,7 +106,7 @@ internal class Server
         Console.WriteLine("Ready to send data.");
         while (true)
         {
-            string key = "Console.ReadLine()";
+            string key = Console.ReadLine();
             Console.WriteLine(key);
 
             TcpClient client = new TcpClient(IP, Port);
