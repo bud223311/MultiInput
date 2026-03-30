@@ -17,7 +17,7 @@ internal class Server
     private static uint hwnd = 0;
 
 
-    //Assign launch arguments
+    //Assign launch arguments for sender/receiver
     public static void Main(string[] args)
     {
        hwnd = uint.Parse(args[0]);
