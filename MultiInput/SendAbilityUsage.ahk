@@ -57,7 +57,7 @@ StartServer(dir, LaunchType, IP, Port)
     }
     Run(dir A_Space A_ScriptHwnd A_Space LaunchType A_Space IP A_Space Port ,,,&PID)
     global PID
-
+/*
     if LaunchType = "sender"{
         ihlistener.Start
         while ProcessExist(PID) && LaunchType = "sender"{
@@ -70,7 +70,7 @@ StartServer(dir, LaunchType, IP, Port)
         }
         ihlistener.Stop
     }
-
+*/
 }
 
 OnExit(MainClose)

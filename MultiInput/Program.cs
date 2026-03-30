@@ -55,11 +55,11 @@ internal class Server
 
 
     //Start TCP client (Receiver)
-    public static async void ServerListener(int Port)
+    public static void ServerListener(int Port)
     {
         TcpListener server = new(IPAddress.Any, Port);
 
-        FileStream fs = new FileStream(LogPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read, bufferSize: 4096, useAsync: true);
+        FileStream fs = new FileStream(LogPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read, bufferSize: 1024);
         {
             server.Start();
             Console.WriteLine($"Waiting for connection on port: {Port}");
@@ -75,7 +75,11 @@ internal class Server
                 string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                 Console.WriteLine("Received: " + data);
                 
-                await fs.WriteAsync(buffer);
+                fs.Write(buffer, 0, buffer.Length);
+
+
+                client.Close();
+                
                 //Recieved(data, client, stream);
             }
         }
@@ -106,21 +110,18 @@ internal class Server
     */
 
     //Start TCP server (Sender)
-    public static void ServerSender(string IP, int Port)
+    private static void ServerSender(string IP, int Port)
     {
         Console.WriteLine("Ready to send data.");
-
-
-
         while (true)
         {
             //add read logpath stream for getting data from ahk
-            string key = Console.ReadLine();
-            Console.WriteLine(key);
+            string? key = Console.ReadLine();
+            if (key == null) return;
 
             TcpClient client = new TcpClient(IP, Port);
             NetworkStream stream = client.GetStream();
-
+            
             byte[] data = Encoding.UTF8.GetBytes(key);
             stream.Write(data, 0, data.Length);
 
