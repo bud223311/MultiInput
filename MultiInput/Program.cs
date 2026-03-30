@@ -16,6 +16,8 @@ internal class Server
     private static bool NoStartup = false;
     private static uint hwnd = 0;
 
+
+    //Assign launch arguments
     public static void Main(string[] args)
     {
        hwnd = uint.Parse(args[0]);
