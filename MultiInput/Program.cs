@@ -11,12 +11,12 @@ internal class Server
 {
     //[DllImport("user32.dll")]
     //static extern bool PostMessage(HandleRef hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-    
+
     internal const bool Debug = true;
     private static uint hwnd = 0;
     private static string RunTime = string.Format("{0:D}", System.DateTime.Now);
     private static readonly string LogPath = Path.Combine(AppContext.BaseDirectory, $"log {RunTime.Replace(':', '.')}.txt");
-    
+
 
     //Launch args validation and handling
     public static void Main(string[] args)
@@ -41,11 +41,6 @@ internal class Server
         //add hwnd validity check unless in debug
 
 
-        
-
-
-        
-
 
         switch (LaunchType)
         {
@@ -62,8 +57,6 @@ internal class Server
     //Start TCP client (Receiver)
     public static async void ServerListener(int Port)
     {
-
-
         TcpListener server = new(IPAddress.Any, Port);
 
         FileStream fs = new FileStream(LogPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read, bufferSize: 4096, useAsync: true);
@@ -71,24 +64,18 @@ internal class Server
             server.Start();
             Console.WriteLine($"Waiting for connection on port: {Port}");
 
-
-
             while (true)
             {
-                //byte[] streamdata = System.Text.Encoding.UTF8.GetBytes("Streamed asdasdcontent.");
-
-                
-                //Console.WriteLine(System.Text.Encoding.UTF8.GetString(streamdata));
-
                 TcpClient client = server.AcceptTcpClient();
                 NetworkStream stream = client.GetStream();
 
                 byte[] buffer = new byte[1024];
                 int bytesRead = stream.Read(buffer, 0, buffer.Length);
-
+                
                 string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                 Console.WriteLine("Received: " + data);
-                await fs.WriteAsync(buffer, 0, buffer.Length);
+                
+                await fs.WriteAsync(buffer);
                 //Recieved(data, client, stream);
             }
         }
@@ -122,8 +109,12 @@ internal class Server
     public static void ServerSender(string IP, int Port)
     {
         Console.WriteLine("Ready to send data.");
+
+
+
         while (true)
         {
+            //add read logpath stream for getting data from ahk
             string key = Console.ReadLine();
             Console.WriteLine(key);
 
@@ -136,8 +127,10 @@ internal class Server
             client.Close();
         }
     }
+}
 
     //Log file handling
+    /*
     private static void LogFile(string data)
     {
         if (OperatingSystem.IsWindows())
@@ -165,6 +158,7 @@ internal class Server
 
     }
 }
+    */
 /*
  TODO:
     Send inputs from ahk to program
