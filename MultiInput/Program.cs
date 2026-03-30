@@ -17,7 +17,6 @@ internal class Server
     private static string RunTime = string.Format("{0:D}", System.DateTime.Now);
     private static readonly string LogPath = Path.Combine(AppContext.BaseDirectory, $"log {RunTime.Replace(':', '.')}.txt");
 
-
     //Launch args validation and handling
     public static void Main(string[] args)
     {
@@ -84,34 +83,9 @@ internal class Server
                 fs.Write(message, 0, message.Length);
                 Console.WriteLine($"{buffer[0]}");
                 client.Close();
-                //Recieved(data, client, stream);
             }
         }
     }
-
-    //Handle received TCP data from server
-    /*
-    private static void Recieved(string data, TcpClient client, NetworkStream stream)
-    {
-        if (data.Length != 5)
-        {
-            client.Close();
-            return;
-        }
-        //PostMessage(hwnd, data,0,0);
-
-        if (Debug)
-        {
-            if (NoStartup)
-            {
-                //Broken LogFile($"{data}     RequestFrom: {client.Client.RemoteEndPoint}");
-                return;
-            }
-            //Broken  LogFile($"{data} {StartupArguments[0]}    RequestFrom: {client.Client.RemoteEndPoint}");
-            //SendDataToAhk(HWND, data);
-        }
-    }
-    */
 
     //Start TCP server (Sender)
     private static void ServerSender(string IP, int Port)
@@ -133,37 +107,6 @@ internal class Server
         }
     }
 }
-
-    //Log file handling
-    /*
-    private static void LogFile(string data)
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            var wUser = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-            try
-            {
-                var regexArray = Regex.Split(wUser, @"^(.*?)\\");
-                wUser = regexArray[2];
-            }
-            catch (Exception) { throw; }
-
-
-            var path = $@"C:\Users\{wUser}\Documents\KiplingStuff";
-            var LogPath = $@"C:\Users\{wUser}\Documents\KiplingStuff\Log";
-
-            if (!File.Exists($"{LogPath}\\ServerLog.txt"))
-            {
-                Directory.CreateDirectory(LogPath);
-                File.Create($"{LogPath}\\ServerLog.txt");
-            }
-            File.WriteAllText(LogPath, data);
-        }
-
-
-    }
-}
-    */
 /*
  TODO:
     Send inputs from ahk to program
