@@ -19,6 +19,11 @@ StartSendData(*)
             MainGUI.Submit(false)
             SendToggle.Text := ("Stop Sending")
             ReceiveToggle.Opt('Disabled')
+            if FileExist(MultiInputExe) = ""
+            {
+                MsgBox("No MultiInput.exe was found ")
+                MainClose()
+            }
 
             StartServer(MultiInputExe, "sender", SendIp.Value, SendPort.Value)
 
