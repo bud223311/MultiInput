@@ -118,7 +118,7 @@ StartServer(dir, LaunchType, IP, Port)
         ErrorMessage :=("Port")
     }
     else if LaunchType = "sender" && IP = ''{
-        ErrorMessage := (" IP")
+        ErrorMessage := ("IP")
     }
     if IsSet(ErrorMessage)
     {
@@ -160,7 +160,14 @@ InputMonitor(*){
 
 
 WriteToLog(data){
-    MsgBox(data)
+    switch data{
+        case Hotkey1.Value:
+            MsgBox(Key1.Text)
+        case Hotkey2.Value:
+            MsgBox(Key2.Text)
+        case Hotkey3.Value:
+            MsgBox(Key3.Text)
+    }
 }
 /*
 ;Only use the callbacks to pass correct data
