@@ -1,9 +1,8 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.IO;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ConsoleApp1;
 
@@ -58,8 +57,16 @@ internal class Server
     {
         TcpListener server = new(IPAddress.Any, Port);
 
-        FileStream fs = new(LogPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read, bufferSize: 8, useAsync: true);
+        FileStream fs = new(LogPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read, bufferSize: 8);
         {
+            //Get newline byte value for formatting log
+            var newlinetxt = Environment.NewLine;
+            byte[] newline = Encoding.UTF8.GetBytes(newlinetxt);
+
+            //Position file pointer to new line at file end
+            fs.Position = fs.Seek(0, SeekOrigin.End);
+            fs.WriteAsync(newline, 0, newlinetxt.Length);
+
             server.Start();
             Console.WriteLine($"Waiting for connection on port: {Port}");
 
@@ -67,7 +74,7 @@ internal class Server
             {
                 TcpClient client = server.AcceptTcpClient();
                 NetworkStream stream = client.GetStream();
-
+                
                 byte[] buffer = new byte[8];
                 int bytesRead = stream.Read(buffer, 0, buffer.Length);
                 
@@ -77,11 +84,14 @@ internal class Server
                 {
                     message[i] = buffer[i];
                 }
-                
-                Console.WriteLine("Received: " + data);
-                
+                Console.WriteLine($"Received: {data}");
+
+                //write newline before each new log entry
+                fs.Write(newline, 0, newlinetxt.Length);
                 fs.Write(message, 0, message.Length);
+
                 Console.WriteLine($"{buffer[0]}");
+
                 client.Close();
             }
         }
@@ -90,22 +100,41 @@ internal class Server
     //Start TCP server (Sender)
     private static void ServerSender(string IP, int Port)
     {
-        Console.WriteLine("Ready to send data.");
-        while (true)
+        FileStream fs = new(LogPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, bufferSize: 8);
         {
-            //add read logpath stream for getting data from ahk
-            string? key = Console.ReadLine();
-            if (key == null) return;
+            var newlinetxt = Environment.NewLine;
+            byte[] newline = Encoding.UTF8.GetBytes(newlinetxt);
 
-            TcpClient client = new(IP, Port);
-            NetworkStream stream = client.GetStream();
-            
-            byte[] data = Encoding.UTF8.GetBytes(key);
-            stream.Write(data, 0, data.Length);
+            fs.Position = fs.Seek(0, SeekOrigin.End);
+            fs.WriteAsync(newline, 0, newlinetxt.Length);
+            //debug
 
-            client.Close();
+            Console.WriteLine("Ready to send data.");
+            while (true)
+            {
+                //add read logpath stream for getting data from ahk
+
+                TcpClient client = new(IP, Port);
+                NetworkStream stream = client.GetStream();
+
+
+                int key = fs.ReadByte();
+
+
+
+                byte[] data = Encoding.UTF8.GetBytes(key.ToString());
+                stream.Write(data, 0, data.Length);
+
+                client.Close();
+            }
         }
     }
+
+
+
+
+
+
 }
 /*
  TODO:
