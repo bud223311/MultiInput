@@ -27,10 +27,10 @@ internal class TcpReceiver
             {
                 TcpClient client = server.AcceptTcpClient();
                 NetworkStream stream = client.GetStream();
-                
+
                 byte[] buffer = new byte[8];
                 int bytesRead = stream.Read(buffer, 0, buffer.Length);
-                
+
                 string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                 byte[] message = new byte[data.Length];
                 for (int i = 0; i < message.Length; i++)
