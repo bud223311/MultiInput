@@ -3,11 +3,21 @@ Persistent
 MultiInputExe := A_WorkingDir "\bin\Debug\net9.0\MultiInput.exe"
 ihlistener := InputHook("L1 M")
 MainGUI := Gui()
-SendToggle := MainGUI.AddButton(,"Send Data")
-ReceiveToggle := MainGUI.AddButton(,"Receive Data")
-SendIP := MainGUI.AddEdit('Limit15 w80 y7 xm+90')
-SendPort := MainGUI.AddEdit('Limit5 w80 y35 xm+90')
+
+SendToggle := MainGUI.AddButton('ym+110',"Send Data")
+ReceiveToggle := MainGUI.AddButton('ym+110',"Receive Data")
+ClearHotkeys := MainGUI.AddButton('ym+110 xm+195', "Clear Hotkeys")
+
+SendIP := MainGUI.AddEdit('Limit15 w90 ym xm+25')
+SendPort := MainGUI.AddEdit('Limit5 Number w90 yp+25 xm+25')
+MainGUI.AddText('ym+3 xm',"IP:`n`nPort:" )
+
+
+MainGUI.AddHotkey('xm+190 ym w80')
+MainGUI.AddHotkey('xm+190 yp+25 w80')
+MainGUI.AddHotkey('xm+190 yp+25 w80')
 LastInput := MainGUI.AddText(,"nul")
+
 MainGUI.OnEvent('Close', MainClose)
 
 SendToggle.OnEvent('Click',StartSendData)
@@ -30,7 +40,7 @@ StartSendData(*)
         case "Stop Sending":
             SendToggle.Text := ("Send Data")
             ReceiveToggle.Opt('-Disabled')
-            ProcessClose(PID)
+            try ProcessClose(PID)
     }
 }
 
@@ -48,21 +58,33 @@ StartReceiveData(*)
         case "Stop Receiving":
             ReceiveToggle.Text := ("Receive Data")
             SendToggle.Opt('-Disabled')
-            ProcessClose(PID)
+            try ProcessClose(PID)
     }
 }
 
-MainGUI.Show('h80 w200')
+MainGUI.Show('h150 w300')
 
 StartServer(dir, LaunchType, IP, Port)
 {
-    if IP = ''
+    if (Port = "")
     {
+        ErrorMessage :=("Port")
+    }
+    if LaunchType = "sender" && IP = ''
+    {
+        if LaunchType = "sender" {
+            ErrorMessage := ErrorMessage (" IP")
+        }
         IP := "null"
+    }
+    if IsSet(ErrorMessage)
+    {
+        MsgBox(ErrorMessage " must be specified","Invalid Configuration")
+        return
     }
     Run(dir A_Space A_ScriptHwnd A_Space LaunchType A_Space IP A_Space Port ,,,&PID)
     global PID
-/*
+
     if LaunchType = "sender"{
         ihlistener.Start
         while ProcessExist(PID) && LaunchType = "sender"{
@@ -75,14 +97,14 @@ StartServer(dir, LaunchType, IP, Port)
         }
         ihlistener.Stop
     }
-*/
+
 }
 
 OnExit(MainClose)
 
 MainClose(*){
     if IsSet(PID){
-        ProcessClose('ahk_pid ' PID)
+        ProcessClose(PID)
     }
     ExitApp
 }
