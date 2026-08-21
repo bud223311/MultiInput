@@ -94,8 +94,8 @@ public class Key
     public static void InitializeKeys(){
         new Key(Enums.Constants.Keys.VK_W,InputType.WOn,InputType.WOff).Register();
         new Key(Enums.Constants.Keys.VK_A,InputType.AOn,InputType.AOff).Register();
-        new Key(Enums.Constants.Keys.VK_S,InputType.AOn,InputType.AOff).Register();
-        new Key(Enums.Constants.Keys.VK_D,InputType.AOn,InputType.AOff).Register();
+        new Key(Enums.Constants.Keys.VK_S,InputType.SOn,InputType.SOff).Register();
+        new Key(Enums.Constants.Keys.VK_D,InputType.DOn,InputType.DOff).Register();
     }
 
     public Key(int vKey,byte[] onState,byte[] offState){
