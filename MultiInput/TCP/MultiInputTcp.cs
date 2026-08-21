@@ -19,6 +19,7 @@ public class MultiInputTcp
         private bool _connected;
 
         public void Awake(){
+            Console.WriteLine($"Waiting For Connections...");
             _connected = false;
             Listener.Start();
             Key.InitializeKeys();
@@ -45,6 +46,7 @@ public class MultiInputTcp
         private bool _connected;
         public void Awake(){
             _connected = false;
+            Console.WriteLine($"Connecting...");
             Client.Connect(ConnectionGoesTo, Port);
         }
         public void Update(){
