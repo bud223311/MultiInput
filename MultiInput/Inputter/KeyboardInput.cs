@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Unicode;
 using MultiInput.Enums;
@@ -69,7 +70,7 @@ public class Key
     public int VKey;
     public bool IsDown;
 
-    public static void UpdateKeys(MultiInputTcp.KTcpHost kTcpHost){
+    public static void UpdateKeys(Socket kTcpHost){
         foreach (var key in Keys.Values) {
             bool newState = IsKeyDown(key.VKey);
             if (key.IsDown != newState) {
@@ -78,7 +79,7 @@ public class Key
         }
     }
 
-    public void OnKeyStateChange(KeyStateChanged ev, MultiInputTcp.KTcpHost kTcpHost){
+    public void OnKeyStateChange(KeyStateChanged ev, Socket kTcpHost){
         var span = new Span<byte>();
         var interpolatedStringHandler = new Utf8.TryWriteInterpolatedStringHandler();
         interpolatedStringHandler.AppendLiteral(ev == KeyStateChanged.JustPressed ? $"{VKey} on" : $"{VKey} off");
@@ -89,7 +90,7 @@ public class Key
             return;
         }
         Console.WriteLine($"Writing amount|{written}| data");
-        kTcpHost.Listener.Server.Send(span);
+        kTcpHost.Send(span);
         
     }
 

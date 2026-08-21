@@ -16,6 +16,7 @@ public class MultiInputTcp
     public class KTcpHost(TcpListener listener)
     {
         public TcpListener Listener = listener;
+        public Socket Client;
         private bool _connected;
 
         public void Awake(){
@@ -26,15 +27,19 @@ public class MultiInputTcp
             
         }
         public void Update(){
+            if (Listener.Pending()) {
+                Client = Listener.AcceptSocket();
+            }
             if (!Listener.Server.Connected) {
                 _connected = false;
                 return;
             }
+            
             if (!_connected) {
                 OnConnect(Listener.Server.RemoteEndPoint);
                 _connected = true;
             }
-            Key.UpdateKeys(this);
+            Key.UpdateKeys(Client);
         }
     }
 
@@ -75,6 +80,7 @@ public class MultiInputTcp
     }
 
     public static void OnConnect(EndPoint? clientRemoteEndPoint){
+        Console.WriteLine($"test");
         Console.WriteLine($"Connected to: {clientRemoteEndPoint}");
     }
 }
