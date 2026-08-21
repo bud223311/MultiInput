@@ -10,7 +10,6 @@ internal static class TcpServer
 {
     
     private static readonly string RunTime = $"{DateTime.Now}";
-    internal static readonly string LogPath = Path.Combine(Environment.CurrentDirectory, $"log {RunTime.Replace(':', '.')}.txt");
     public static bool EndProgram = false;
     public static bool WriteInstruction = true;
 
