@@ -16,7 +16,7 @@ public class MultiInputTcp
     public class KTcpHost(TcpListener listener)
     {
         public TcpListener Listener = listener;
-        public Socket Client;
+        public Socket? Client;
         private bool _connected;
 
         public void Awake(){
@@ -28,13 +28,13 @@ public class MultiInputTcp
         }
         public void Update(){
             if (Listener.Pending()) {
+                Console.WriteLine($"Found Pending Request");
                 Client = Listener.AcceptSocket();
             }
-            if (!Listener.Server.Connected) {
+            if (Client is null||!Client.Connected) {
                 _connected = false;
                 return;
             }
-            
             if (!_connected) {
                 OnConnect(Listener.Server.RemoteEndPoint);
                 _connected = true;
@@ -55,7 +55,6 @@ public class MultiInputTcp
             Client.Connect(ConnectionGoesTo, Port);
         }
         public void Update(){
-            
             if (Client is{ Connected: false, Available: 0}) {
                 _connected = false;
                 return;
@@ -65,11 +64,12 @@ public class MultiInputTcp
                 OnConnect(Client.Client.RemoteEndPoint);
                 _connected = true;
             }
-            
 
 
-            var buffer = new Span<byte>();
+
+            byte[] buffer = new byte[255];
             int amount = Client.Client.Receive(buffer);
+            
             if (amount is 0) {
                 return;
             }

@@ -11,7 +11,6 @@ internal static class TcpServer
     
     private static readonly string RunTime = $"{DateTime.Now}";
     public static bool EndProgram = false;
-    public static bool WriteInstruction = true;
 
     //Launch args validation and handling
     public static void Main(string[] args){
