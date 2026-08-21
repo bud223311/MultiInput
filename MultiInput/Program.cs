@@ -16,12 +16,14 @@ internal static class TcpServer
     //Launch args validation and handling
     public static void Main(string[] args){
         while (!EndProgram) {
-            if (WriteInstruction)
+            if (WriteInstruction) {
                 Console.WriteLine($"Connect to a machine running this application using:\nip:port e.g(127.0.0.1:7777)\nOr start accepting Connections using\naccept or a");
-            WriteInstruction = false;
+            }
             if (!WriteInstruction) {
                 Console.WriteLine($"Error Occured :/");
             }
+            WriteInstruction = false;
+
             string consoleStr = Console.ReadLine() ?? string.Empty;
             if (consoleStr.ToLowerInvariant() is "accept" or "a" or "acc") {
                 Console.WriteLine($"Port in which to accept on?");
