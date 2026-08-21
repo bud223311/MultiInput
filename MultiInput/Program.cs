@@ -1,65 +1,64 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net;
+using System.Net.Sockets;
+using System.Text.RegularExpressions;
+using MultiInput.Extensions;
 using MultiInput.TCP;
 
 namespace MultiInput;
 
-internal class TcpServer
+internal static class TcpServer
 {
-    //[DllImport("user32.dll")]
-    //static extern bool PostMessage(HandleRef hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
-    internal const bool Debug = true;
-    private static uint _hwnd;
-    private static readonly string RunTime = $"{DateTime.Now:D}";
-    internal static readonly string LogPath = Path.Combine(AppContext.BaseDirectory, $"log {RunTime.Replace(':', '.')}.txt");
+    
+    private static readonly string RunTime = $"{DateTime.Now}";
+    internal static readonly string LogPath = Path.Combine(Environment.CurrentDirectory, $"log {RunTime.Replace(':', '.')}.txt");
+    public static bool EndProgram = false;
+    public static bool WriteInstruction = true;
 
     //Launch args validation and handling
-    public static void Main(string[] args)
-    {
-        Console.WriteLine(LogPath);
+    public static void Main(string[] args){
+        while (!EndProgram) {
+            if (WriteInstruction)
+                Console.WriteLine($"Connect to a machine running this application using:\nip:port e.g(127.0.0.1:7777)\nOr start accepting Connections using\naccept or a");
+            WriteInstruction = false;
+            if (!WriteInstruction) {
+                Console.WriteLine($"Error Occured :/");
+            }
+            string consoleStr = Console.ReadLine() ?? string.Empty;
+            if (consoleStr.ToLowerInvariant() is "accept" or "a" or "acc") {
+                Console.WriteLine($"Port in which to accept on?");
+                string port = Console.ReadLine() ?? string.Empty;
+                if (!int.TryParse(port,out int tPort)) {
+                    continue;
+                }
 
-        if (args.Length == 0)
-        {
-            Console.WriteLine("No arguments found...");
-            throw new Exception("No arguments provided. Please use the attached executable.");
-        }
-        _hwnd = uint.Parse(args[0]);
-        string launchType = args[1];
-        string ip = args[2];
-        int port = int.Parse(args[3]);
+                MultiInputTcp.KTcpHost host = new MultiInputTcp.KTcpHost(TcpListener.Create(tPort));
+                host.Awake();
+                while (!EndProgram) {
+                    host.Update();
+                }
+            }
 
-        if (!Regex.IsMatch(_hwnd.ToString(), "[0-9]{6,7}"))
-        {
-            Console.WriteLine($"HWND ({_hwnd}) specified, connecting to AHK...");
-        }
-        //add hwnd validity check unless in debug
+            if (consoleStr == string.Empty) {
+                continue;
+            }
 
-        switch (launchType)
-        {
-            case "receiver":
-                //Start TCP client (Receiver)
-                TcpReceiver.ServerListener(port);
-                break;
-            case "sender":
-                //Start TCP server (Sender)
-                TcpSender.ServerSender(ip, port);
-                break;
+            if (!consoleStr.ValidateIpPort()) {
+                continue;
+            }
+
+            if (!IPAddress.TryParse(consoleStr.Split(':')[0], out var address)) {
+                continue;
+            }
+
+            if (!int.TryParse(consoleStr.Split(':')[1], out int portresult)) {
+                continue;
+            }
+
+            var tcpClient = new MultiInputTcp.KTcpClient(new TcpClient(),address,portresult);
+            tcpClient.Awake();
+            while (!EndProgram) {
+                tcpClient.Update();
+            }
         }
     }
 }
-/*
- TODO:
-    Send inputs from ahk to program
-    Log sent/received inputs
-    Make ahk script read logs data for inputs
-    Validate IP formatting & connectivity
-    Verify HWND to be ahk script
-    Connection authentication for recipient
-    Connection validation for sender + receiver
-    Store historical IP + Ports
-    Config to hide plaintext IP's
-    Configurable rate limit
-    GUI clean-up & feature additions
-    Hotkeys for enable/disable (+ quick exit)
-    
- */
