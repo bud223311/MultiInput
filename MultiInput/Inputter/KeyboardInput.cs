@@ -74,22 +74,18 @@ public class Key
         foreach (var key in Keys.Values) {
             bool newState = IsKeyDown(key.VKey);
             if (key.IsDown != newState) {
+                key.IsDown = newState;
                 key.OnKeyStateChange(newState ? KeyStateChanged.JustPressed : KeyStateChanged.JustReleased,kTcpHost);
             }
         }
     }
 
     public void OnKeyStateChange(KeyStateChanged ev, Socket kTcpHost){
-        var span = new Span<byte>();
-        var interpolatedStringHandler = new Utf8.TryWriteInterpolatedStringHandler();
-        interpolatedStringHandler.AppendLiteral(ev == KeyStateChanged.JustPressed ? $"{VKey} on" : $"{VKey} off");
+        string data = ev == KeyStateChanged.JustPressed ? $"{VKey}On" : $"{VKey}Off";
 
+        var span = Encoding.UTF8.GetBytes(data);
 
-        if (!Utf8.TryWrite(span, ref interpolatedStringHandler, out var written)) {
-            Console.WriteLine($"Failed To Write Utf8 : key:{this.VKey} newstate:{ev}");
-            return;
-        }
-        Console.WriteLine($"Writing amount|{written}| data");
+        Console.WriteLine($"Writing amount|{span.Length}| data");
         kTcpHost.Send(span);
         
     }
