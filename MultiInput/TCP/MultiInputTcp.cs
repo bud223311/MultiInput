@@ -16,15 +16,22 @@ public class MultiInputTcp
     public class KTcpHost(TcpListener listener)
     {
         public TcpListener Listener = listener;
+        private bool _connected;
 
         public void Awake(){
+            _connected = false;
             Listener.Start();
             Key.InitializeKeys();
             
         }
         public void Update(){
             if (!Listener.Server.Connected) {
+                _connected = false;
                 return;
+            }
+            if (!_connected) {
+                OnConnect(Listener.Server.RemoteEndPoint);
+                _connected = true;
             }
             Key.UpdateKeys(this);
         }
@@ -35,14 +42,23 @@ public class MultiInputTcp
         public TcpClient Client = client;
         public IPAddress ConnectionGoesTo = connectionTo;
         public int Port = port;
-        
+        private bool _connected;
         public void Awake(){
+            _connected = false;
             Client.Connect(ConnectionGoesTo, Port);
         }
         public void Update(){
+            
             if (Client is{ Connected: false, Available: 0}) {
+                _connected = false;
                 return;
             }
+
+            if (!_connected) {
+                OnConnect(Client.Client.RemoteEndPoint);
+                _connected = true;
+            }
+            
 
 
             var buffer = new Span<byte>();
@@ -54,5 +70,9 @@ public class MultiInputTcp
             string stream = Encoding.UTF8.GetString(buffer);
             Console.WriteLine(stream);
         }
+    }
+
+    public static void OnConnect(EndPoint? clientRemoteEndPoint){
+        Console.WriteLine($"Connected to: {clientRemoteEndPoint}");
     }
 }
