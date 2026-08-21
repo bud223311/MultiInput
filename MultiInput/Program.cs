@@ -16,15 +16,10 @@ internal static class TcpServer
     //Launch args validation and handling
     public static void Main(string[] args){
         while (!EndProgram) {
-            if (WriteInstruction) {
-                Console.WriteLine($"Connect to a machine running this application using:\nip:port e.g(127.0.0.1:7777)\nOr start accepting Connections using\naccept or a");
-            }
-            if (!WriteInstruction) {
-                Console.WriteLine($"Error Occured :/");
-            }
-            WriteInstruction = false;
-
+            Console.WriteLine($"Connect to a machine running this application using:\nip:port e.g(127.0.0.1:7777)\nOr start accepting Connections using\naccept or a");
             string consoleStr = Console.ReadLine() ?? string.Empty;
+            
+            
             if (consoleStr.ToLowerInvariant() is "accept" or "a" or "acc") {
                 Console.WriteLine($"Port in which to accept on?");
                 string port = Console.ReadLine() ?? string.Empty;
@@ -40,18 +35,22 @@ internal static class TcpServer
             }
 
             if (consoleStr == string.Empty) {
+                Console.WriteLine($"consoleStr is Empty");
                 continue;
             }
 
             if (!consoleStr.ValidateIpPort()) {
+                Console.WriteLine($"Validation Failed: {consoleStr}");
                 continue;
             }
 
             if (!IPAddress.TryParse(consoleStr.Split(':')[0], out var address)) {
+                Console.WriteLine($"IPAddress TryParse Failed: {consoleStr}");
                 continue;
             }
 
             if (!int.TryParse(consoleStr.Split(':')[1], out int portresult)) {
+                Console.WriteLine($"Port TryParse Failed: {consoleStr}");
                 continue;
             }
 
