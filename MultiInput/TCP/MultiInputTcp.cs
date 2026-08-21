@@ -38,11 +38,12 @@ public class MultiInputTcp
             Client.Connect(ConnectionGoesTo, Port);
         }
         public void Update(){
-            if (!Client.Connected) {
+            if (Client is{ Connected: false, Available: 0}) {
                 return;
             }   
 
             var buffer = new byte[8];
+            
             Client.Client.Receive(buffer);
             if (buffer[0] != 8) return;
             KeyboardInput.Handle(buffer[1]);
