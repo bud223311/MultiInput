@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Text.Unicode;
 using Microsoft.VisualBasic;
 using MultiInput.Enums;
 using MultiInput.Enums.Constants;
@@ -40,16 +42,17 @@ public class MultiInputTcp
         public void Update(){
             if (Client is{ Connected: false, Available: 0}) {
                 return;
-            }   
-
-            var buffer = new byte[8];
-            
-            int amount = Client.Client.Receive(buffer);
-            if (amount is not 0) {
-                Console.WriteLine($"Received {amount} of bytes \n Buffer:\n0:{buffer[0]}\n1:{buffer[1]}");
             }
-            if (buffer[0] != 8) return;
-            KeyboardInput.Handle(buffer[1]);
+
+
+            var buffer = new Span<byte>();
+            int amount = Client.Client.Receive(buffer);
+            if (amount is 0) {
+                return;
+            }
+            Console.WriteLine($"Received {amount} of bytes");
+            string stream = Encoding.UTF8.GetString(buffer);
+            Console.WriteLine(stream);
         }
     }
 }

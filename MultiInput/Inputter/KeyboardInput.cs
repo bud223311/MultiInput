@@ -1,4 +1,6 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.Unicode;
 using MultiInput.Enums;
 using MultiInput.Enums.Constants;
 using MultiInput.TCP;
@@ -77,14 +79,18 @@ public class Key
     }
 
     public void OnKeyStateChange(KeyStateChanged ev, MultiInputTcp.KTcpHost kTcpHost){
-        switch (ev) {
-            case KeyStateChanged.JustPressed:
-                kTcpHost.Listener.Server.Send(this.OnState);
-                break;
-            case KeyStateChanged.JustReleased:
-                kTcpHost.Listener.Server.Send(this.OffState);
-                break;
+        var span = new Span<byte>();
+        var interpolatedStringHandler = new Utf8.TryWriteInterpolatedStringHandler();
+        interpolatedStringHandler.AppendLiteral(ev == KeyStateChanged.JustPressed ? $"{VKey} on" : $"{VKey} off");
+
+
+        if (!Utf8.TryWrite(span, ref interpolatedStringHandler, out var written)) {
+            Console.WriteLine($"Failed To Write Utf8 : key:{this.VKey} newstate:{ev}");
+            return;
         }
+        Console.WriteLine($"Writing amount|{written}| data");
+        kTcpHost.Listener.Server.Send(span);
+        
     }
 
     public static Key? GetKeyByVKey(int key){
