@@ -44,7 +44,10 @@ public class MultiInputTcp
 
             var buffer = new byte[8];
             
-            Client.Client.Receive(buffer);
+            int amount = Client.Client.Receive(buffer);
+            if (amount is not 0) {
+                Console.WriteLine($"Received {amount} of bytes \n Buffer:\n0:{buffer[0]}\n1:{buffer[1]}");
+            }
             if (buffer[0] != 8) return;
             KeyboardInput.Handle(buffer[1]);
         }
