@@ -88,7 +88,7 @@ public class Key
 
         Console.WriteLine($"sending: |{data}|  length:|{span.Length}| data");
         try {
-            kTcpHost.SendAsync(span);
+            kTcpHost.Send(span);
         }
         catch (Exception) {
             kTcpHost.Dispose();
