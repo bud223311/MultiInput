@@ -23,16 +23,16 @@ public class KeyboardInput
                     output += data.Substring(i, 3) + ".";
                 else
                     output += data.Substring(i);
-                foreach (var str in output.Split('.')) {
-                    Console.WriteLine($"orig:{output} for:{str}");
-                    if (!int.TryParse(str[2].ToString(), out int fState) || !int.TryParse(str.Remove(2), out int fKey)) {
-                        Console.WriteLine($"Failed To Handle Data {data} LN 45");
-                        return;
-                    }
-
-                    Console.WriteLine($"KEY:{fKey} STATE:{fState}");
-                    SendKeyStroke(fKey,fState);
+            }
+            foreach (var str in output.Split('.')) {
+                Console.WriteLine($"orig:{output} for:{str}");
+                if (!int.TryParse(str[2].ToString(), out int fState) || !int.TryParse(str.Remove(2), out int fKey)) {
+                    Console.WriteLine($"Failed To Handle Data {data} LN 45");
+                    return;
                 }
+
+                Console.WriteLine($"KEY:{fKey} STATE:{fState}");
+                SendKeyStroke(fKey,fState);
             }
             return;
         }
