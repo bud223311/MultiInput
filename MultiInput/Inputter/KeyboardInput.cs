@@ -16,6 +16,7 @@ public class KeyboardInput
     private InputSimulator _inputSimulator = new InputSimulator();
 
     public void Handle(string data){
+        Console.WriteLine($"{data} L:{data.Length}");
         if (data.Length > 3) {
             for (int i = 0; i < data.Length / 3; i++) {
                 if (i == 0) {
