@@ -60,8 +60,6 @@ public class KeyboardInput
 public class Key
 {
     public static Dictionary<int, Key> Keys = new Dictionary<int, Key>();
-    public byte[] OnState;
-    public byte[] OffState;
     public int VKey;
     public bool IsDown;
 
@@ -98,16 +96,37 @@ public class Key
     }
 
     public static void InitializeKeys(){
-        new Key(Enums.Constants.Keys.VK_W,InputType.WOn,InputType.WOff).Register();
-        new Key(Enums.Constants.Keys.VK_A,InputType.AOn,InputType.AOff).Register();
-        new Key(Enums.Constants.Keys.VK_S,InputType.SOn,InputType.SOff).Register();
-        new Key(Enums.Constants.Keys.VK_D,InputType.DOn,InputType.DOff).Register();
+        new Key((int)VirtualKeyCode.VK_A).Register();
+        new Key((int)VirtualKeyCode.VK_B).Register();
+        new Key((int)VirtualKeyCode.VK_C).Register();
+        new Key((int)VirtualKeyCode.VK_D).Register();
+        new Key((int)VirtualKeyCode.VK_E).Register();
+        new Key((int)VirtualKeyCode.VK_F).Register();
+        new Key((int)VirtualKeyCode.VK_G).Register();
+        new Key((int)VirtualKeyCode.VK_H).Register();
+        new Key((int)VirtualKeyCode.VK_I).Register();
+        new Key((int)VirtualKeyCode.VK_J).Register();
+        new Key((int)VirtualKeyCode.VK_K).Register();
+        new Key((int)VirtualKeyCode.VK_L).Register();
+        new Key((int)VirtualKeyCode.VK_M).Register();
+        new Key((int)VirtualKeyCode.VK_N).Register();
+        new Key((int)VirtualKeyCode.VK_O).Register();
+        new Key((int)VirtualKeyCode.VK_P).Register();
+        new Key((int)VirtualKeyCode.VK_Q).Register();
+        new Key((int)VirtualKeyCode.VK_R).Register();
+        new Key((int)VirtualKeyCode.VK_S).Register();
+        new Key((int)VirtualKeyCode.VK_T).Register();
+        new Key((int)VirtualKeyCode.VK_U).Register();
+        new Key((int)VirtualKeyCode.VK_V).Register();
+        new Key((int)VirtualKeyCode.VK_W).Register();
+        new Key((int)VirtualKeyCode.VK_X).Register();
+        new Key((int)VirtualKeyCode.VK_Y).Register();
+        new Key((int)VirtualKeyCode.VK_Z).Register();
+        new Key((int)VirtualKeyCode.SPACE).Register();
     }
 
-    public Key(int vKey,byte[] onState,byte[] offState){
+    public Key(int vKey){
         VKey = vKey;
-        OnState = onState;
-        OffState = offState;
     }
 
     public void Register(){
