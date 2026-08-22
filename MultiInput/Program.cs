@@ -31,6 +31,7 @@ internal static class TcpServer
                 while (!EndProgram) {
                     host.Update();
                 }
+                return;
             }
 
             if (consoleStr == string.Empty) {

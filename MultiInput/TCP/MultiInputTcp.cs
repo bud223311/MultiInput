@@ -49,6 +49,7 @@ public class MultiInputTcp
         public IPAddress ConnectionGoesTo = connectionTo;
         public int Port = port;
         private bool _connected;
+        private KeyboardInput _keyboardInput = new KeyboardInput();
         public void Awake(){
             _connected = false;
             Console.WriteLine($"Connecting...");
@@ -74,8 +75,7 @@ public class MultiInputTcp
                 return;
             }
             Console.WriteLine($"Received {amount} of bytes");
-            string stream = Encoding.UTF8.GetString(buffer);
-            Console.WriteLine(stream);
+            _keyboardInput.Handle(Encoding.UTF8.GetString(buffer));
         }
     }
 
