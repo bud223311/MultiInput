@@ -32,6 +32,9 @@ public class MultiInputTcp
                 Client = Listener.AcceptSocket();
             }
             if (Client is null||!Client.Connected) {
+                if (_connected) {
+                    OnDisconnect();
+                }
                 _connected = false;
                 return;
             }
@@ -57,6 +60,9 @@ public class MultiInputTcp
         }
         public void Update(){
             if (Client is{ Connected: false, Available: 0}) {
+                if (_connected) {
+                    OnDisconnect();
+                }
                 _connected = false;
                 return;
             }
@@ -79,7 +85,10 @@ public class MultiInputTcp
     }
 
     public static void OnConnect(EndPoint? clientRemoteEndPoint){
-        Console.WriteLine($"test");
         Console.WriteLine($"Connected to: {clientRemoteEndPoint}");
+    }
+
+    public static void OnDisconnect(){
+        Console.WriteLine($"Disconnected");
     }
 }
