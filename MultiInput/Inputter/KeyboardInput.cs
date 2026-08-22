@@ -21,37 +21,21 @@ public class KeyboardInput
             return;
         }
         Console.WriteLine($"KEY:{key} STATE:{state}");
+        SendKeyStroke(key,state);
     }
     
     
     
-    public void WKey(bool released = false){
-        if (!released) {
-            _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_W);
+    public void SendKeyStroke(int key,int state){
+        if (!Enum.TryParse($"VK_{key}", out VirtualKeyCode keyCode)) {
+            Console.WriteLine($"Failed To Parse Enum");
             return;
         }
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_W);
-    }
-    public void AKey(bool released = false){
-        if (!released) {
-            _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_A);
+        if (state == 1) {
+            _inputSimulator.Keyboard.KeyDown(keyCode);
             return;
         }
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_A);
-    }
-    public void SKey(bool released = false){
-        if (!released) {
-            _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_S);
-            return;
-        }
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_S);
-    }
-    public void DKey(bool released = false){
-        if (!released) {
-            _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_D);
-            return;
-        }
-        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_D);
+        _inputSimulator.Keyboard.KeyUp(keyCode);
     }
     
     
