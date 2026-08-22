@@ -16,8 +16,8 @@ public class KeyboardInput
     private InputSimulator _inputSimulator = new InputSimulator();
 
     public void Handle(string data){
-        string tData = data.Trim();
-        Console.WriteLine($"{data} L:{data.Length} Trimmed:{tData} L:{tData.Length}");
+        int tData = data.Count();
+        Console.WriteLine($"{data} L:{data.Length} TrimmedCount:{tData} ");
         
         if (!int.TryParse(data[2].ToString(), out int state) || !int.TryParse(data.Remove(2), out int key)) {
             Console.WriteLine($"Failed To Handle Data {data}");
