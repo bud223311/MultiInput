@@ -15,13 +15,34 @@ public class KeyboardInput
 {
     private InputSimulator _inputSimulator = new InputSimulator();
 
-    public void Handle(string data){
-        string tData = data.Normalize();
-        
-        Console.WriteLine($"{data} L:{data.Length} TrimmedCount:{tData.Length} ");
-        
+    public void Handle(string data,int count){
+        if (count > 3) {
+            for (int i = 0; i < count / 3; i++) {
+                if (i == 0) {
+                    string firstdata = data.Substring(0, 3);
+                    if (!int.TryParse(firstdata[2].ToString(), out int firststate) || !int.TryParse(firstdata.Remove(2), out int firstkey)) {
+                        Console.WriteLine($"More Failed To Handle Data {data} LN24");
+                        return;
+                    }
+
+                    Console.WriteLine($"More: KEY:{firstkey} STATE:{firststate}");
+                    SendKeyStroke(firstkey,firststate);
+                    continue;
+                }
+
+                string moredata =data[(i * (count/ 3))..];
+                if (!int.TryParse(moredata[2].ToString(), out int morestate) || !int.TryParse(moredata.Remove(2), out int morekey)) {
+                    Console.WriteLine($"Failed To Handle Data {data} LN35");
+                    return;
+                }
+                Console.WriteLine($"More: KEY:{morekey} STATE:{morestate} ");
+                SendKeyStroke(morekey,morestate);
+            }
+            return;
+        }
+
         if (!int.TryParse(data[2].ToString(), out int state) || !int.TryParse(data.Remove(2), out int key)) {
-            Console.WriteLine($"Failed To Handle Data {data}");
+            Console.WriteLine($"Failed To Handle Data {data} LN 45");
             return;
         }
 

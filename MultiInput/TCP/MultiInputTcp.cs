@@ -80,7 +80,7 @@ public class MultiInputTcp
                 return;
             }
             Console.WriteLine($"Received {amount} of bytes");
-            _keyboardInput.Handle(Encoding.UTF8.GetString(buffer));
+            _keyboardInput.Handle(Encoding.UTF8.GetString(buffer),amount);
         }
     }
 
