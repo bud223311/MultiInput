@@ -69,14 +69,11 @@ public class MultiInputTcp
 
 
             byte[] buffer = new byte[255];
-            Task<int> task = Client.Client.ReceiveAsync(buffer);
-            if (task.Status != TaskStatus.RanToCompletion) {
+            int amount = Client.Client.Receive(buffer);
+            if (amount is 0) {
                 return;
             }
-            if (task.Result is 0) {
-                return;
-            }
-            Console.WriteLine($"Received {task.Result} of bytes");
+            Console.WriteLine($"Received {amount} of bytes");
             _keyboardInput.Handle(Encoding.UTF8.GetString(buffer));
         }
     }
