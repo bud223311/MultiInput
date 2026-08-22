@@ -1,156 +1,64 @@
-﻿using System.Diagnostics;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Text.RegularExpressions;
-namespace ConsoleApp1;
+using MultiInput.Extensions;
+using MultiInput.TCP;
 
-internal class Server
+namespace MultiInput;
+
+internal static class TcpServer
 {
-    [DllImport("user32.dll")]
-    static extern bool PostMessage(HandleRef hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+    
+    private static readonly string RunTime = $"{DateTime.Now}";
+    public static bool EndProgram = false;
 
-    internal const bool Debug = true;
-    private static bool NoStartup = false;
-    private static uint hwnd = 0;
+    //Launch args validation and handling
+    public static void Main(string[] args){
+        while (!EndProgram) {
+            Console.WriteLine($"Connect to a machine running this application using:\nip:port e.g(127.0.0.1:7777)\nOr start accepting Connections using\naccept or a");
+            string consoleStr = Console.ReadLine() ?? string.Empty;
+            
+            
+            if (consoleStr.ToLowerInvariant() is "accept" or "a" or "acc") {
+                Console.WriteLine($"Port in which to accept on?");
+                string port = Console.ReadLine() ?? string.Empty;
+                if (!int.TryParse(port,out int tPort)) {
+                    continue;
+                }
 
-    public static void Main(string[] args)
-    {
-       hwnd = uint.Parse(args[0]);
-        
-        if (args.Length == 0)
-        {
-            Console.WriteLine("No arguments found...");
-        }
-        else
-        {
-            if (Regex.IsMatch(args[0], "[0-9]{6,7}"))
-            {
-                Console.WriteLine("HWND (" + hwnd + ") specified, connecting to AHK...");
-            }
-        }
-        try
-        {
-            switch (args[1])
-            {
-                case "receiver":
-                    ServerListener();
-                    break;
-                case "sender":
-                    if (Regex.IsMatch(args[3], "[0-9]{0,5}"))
-                    {
-                        ServerSender(args[2], args[3]);
-                    }
-                    
-                    break;
-            }
-        }
-        catch
-        {
-            Console.WriteLine("This application must be ran using the GUI utility that is included.");
-        }
-    }
-
-
-
-
-
-
-
-
-    //Start TCP server listener
-    public static void ServerListener()
-    {
-        TcpListener server = new(IPAddress.Any, 6567);
-        server.Start();
-        Console.WriteLine("Listening...");
-
-        while (true)
-        {
-            TcpClient client = server.AcceptTcpClient();
-            NetworkStream stream = client.GetStream();
-
-            byte[] buffer = new byte[1024];
-            int bytesRead = stream.Read(buffer, 0, buffer.Length);
-
-            string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            Console.WriteLine("Received: " + data);
-            Recieved(data, client, stream);
-        }
-    }
-
-    //Handle received TCP data from server
-    private static void Recieved(string data, TcpClient client, NetworkStream stream)
-    {
-        if (data.Length != 5)
-        {
-            client.Close();
-            return;
-        }
-        //PostMessage(hwnd, data,0,0);
-        
-        /*
-        if (Debug)
-        {
-            if (NoStartup)
-            {
-                //Broken LogFile($"{data}     RequestFrom: {client.Client.RemoteEndPoint}");
+                MultiInputTcp.KTcpHost host = new MultiInputTcp.KTcpHost(TcpListener.Create(tPort));
+                host.Awake();
+                while (!EndProgram) {
+                    host.Update();
+                }
                 return;
             }
 
-            //Broken  LogFile($"{data} {StartupArguments[0]}    RequestFrom: {client.Client.RemoteEndPoint}");
-            //SendDataToAhk(HWND, data);
-        }
-        */
-    }
-
-
-    //Handle sending TCP data to client
-    public static void ServerSender(string ip, string port)
-    {
-        Console.WriteLine("Ready to send data.");
-        while (true)
-        {
-            string key = "Console.ReadLine()";
-            Console.WriteLine(key);
-
-            TcpClient client = new TcpClient(ip, int.Parse(port));
-            NetworkStream stream = client.GetStream();
-
-            byte[] data = Encoding.UTF8.GetBytes(key);
-            stream.Write(data, 0, data.Length);
-
-            client.Close();
-        }
-    }
-
-    //Log file handling
-    private static void LogFile(string data)
-    {
-        if (OperatingSystem.IsWindows())
-        {
-            var wUser = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-            try
-            {
-                var regexArray = Regex.Split(wUser, @"^(.*?)\\");
-                wUser = regexArray[2];
+            if (consoleStr == string.Empty) {
+                Console.WriteLine($"consoleStr is Empty");
+                continue;
             }
-            catch (Exception) { throw; }
 
-
-            var path = $@"C:\Users\{wUser}\Documents\KiplingStuff";
-            var LogPath = $@"C:\Users\{wUser}\Documents\KiplingStuff\Log";
-
-            if (!File.Exists($"{LogPath}\\ServerLog.txt"))
-            {
-                Directory.CreateDirectory(LogPath);
-                File.Create($"{LogPath}\\ServerLog.txt");
+            if (!consoleStr.ValidateIpPort()) {
+                Console.WriteLine($"Validation Failed: {consoleStr}");
+                continue;
             }
-            File.WriteAllText(LogPath, data);
+
+            if (!IPAddress.TryParse(consoleStr.Split(':')[0], out var address)) {
+                Console.WriteLine($"IPAddress TryParse Failed: {consoleStr}");
+                continue;
+            }
+
+            if (!int.TryParse(consoleStr.Split(':')[1], out int portresult)) {
+                Console.WriteLine($"Port TryParse Failed: {consoleStr}");
+                continue;
+            }
+
+            var tcpClient = new MultiInputTcp.KTcpClient(new TcpClient(),address,portresult);
+            tcpClient.Awake();
+            while (!EndProgram) {
+                tcpClient.Update();
+            }
         }
-
-
     }
 }

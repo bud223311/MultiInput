@@ -2,7 +2,7 @@
   "profiles": {
     "MultiInput": {
       "commandName": "Project",
-      "commandLineArgs": "1234567 sender 0 0"
+      "commandLineArgs": "1111111 sender 192.168.2.100 6567"
     }
   }
 }
