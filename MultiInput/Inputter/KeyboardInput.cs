@@ -17,26 +17,21 @@ public class KeyboardInput
 
     public void Handle(string data,int count){
         if (count > 3) {
-            for (int i = 0; i < count / 3; i++) {
-                if (i == 0) {
-                    string firstdata = data.Substring(0, 3);
-                    if (!int.TryParse(firstdata[2].ToString(), out int firststate) || !int.TryParse(firstdata.Remove(2), out int firstkey)) {
-                        Console.WriteLine($"More Failed To Handle Data {data} LN24");
+            string output = string.Empty;
+            for (int i = 0; i < count; i += 3) {
+                if (i + 3 < count)
+                    output += data.Substring(i, 3) + ".";
+                else
+                    output += data.Substring(i);
+                foreach (var str in output.Split('.')) {
+                    if (!int.TryParse(str[2].ToString(), out int fState) || !int.TryParse(str.Remove(2), out int fKey)) {
+                        Console.WriteLine($"Failed To Handle Data {data} LN 45");
                         return;
                     }
 
-                    Console.WriteLine($"More: KEY:{firstkey} STATE:{firststate}");
-                    SendKeyStroke(firstkey,firststate);
-                    continue;
+                    Console.WriteLine($"KEY:{fKey} STATE:{fState}");
+                    SendKeyStroke(fKey,fState);
                 }
-
-                string moredata =data[(i * (count/ 3))..];
-                if (!int.TryParse(moredata[2].ToString(), out int morestate) || !int.TryParse(moredata.Remove(2), out int morekey)) {
-                    Console.WriteLine($"Failed To Handle Data {data} LN35");
-                    return;
-                }
-                Console.WriteLine($"More: KEY:{morekey} STATE:{morestate} ");
-                SendKeyStroke(morekey,morestate);
             }
             return;
         }
