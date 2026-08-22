@@ -27,18 +27,12 @@ public class KeyboardInput
     
     
     public void SendKeyStroke(int key,int state){
-        if (!Enum.TryParse($"VK_{key}", out VirtualKeyCode keyCode)) {
-            Console.WriteLine($"Failed To Parse Enum");
-            return;
-        }
         if (state == 1) {
-            _inputSimulator.Keyboard.KeyDown(keyCode);
+            _inputSimulator.Keyboard.KeyDown((VirtualKeyCode)key);
             return;
         }
-        _inputSimulator.Keyboard.KeyUp(keyCode);
+        _inputSimulator.Keyboard.KeyUp((VirtualKeyCode)key);
     }
-    
-    
 }
 
 public class Key
