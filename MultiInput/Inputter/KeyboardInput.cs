@@ -5,58 +5,53 @@ using System.Text.Unicode;
 using MultiInput.Enums;
 using MultiInput.Enums.Constants;
 using MultiInput.TCP;
+using WindowsInput;
+using WindowsInput.Native;
 
 namespace MultiInput.Inputter;
 
 
 public class KeyboardInput
 {
+    private InputSimulator _inputSimulator = new InputSimulator();
 
-    public static void Handle(int data){
-        switch (data) {
-            case 1:
-                WKey();
-                break;
-            case 2:
-                WKey(true);
-                break;
-            case 3:
-                AKey();
-                break;
-            case 4:
-                AKey(true);
-                break;
-            case 5:
-                SKey();
-                break;
-            case 6:
-                SKey(true);
-                break;
-            case 7:
-                DKey();
-                break;
-            case 8:
-                DKey(true);
-                break;
-        }
-    }
-    
-    
-    
-    public static void WKey(bool released = false){
-        if (!released) {
-            Console.WriteLine($"wOn");
+    public void Handle(string data){
+        if (!int.TryParse(data.Remove(2), out int key) || !int.TryParse(data[2].ToString(), out int state)) {
+            Console.WriteLine($"Failed To Handle Data {data}");
             return;
         }
-        Console.WriteLine($"wOff");
+        Console.WriteLine($"KEY:{key} STATE:{state}");
     }
-    public static void AKey(bool release = false){
-        
+    
+    
+    
+    public void WKey(bool released = false){
+        if (!released) {
+            _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_W);
+            return;
+        }
+        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_W);
     }
-    public static void SKey(bool release = false){
-        
+    public void AKey(bool released = false){
+        if (!released) {
+            _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_A);
+            return;
+        }
+        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_A);
     }
-    public static void DKey(bool release = false){
+    public void SKey(bool released = false){
+        if (!released) {
+            _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_S);
+            return;
+        }
+        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_S);
+    }
+    public void DKey(bool released = false){
+        if (!released) {
+            _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_D);
+            return;
+        }
+        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_D);
     }
     
     
@@ -72,22 +67,30 @@ public class Key
 
     public static void UpdateKeys(Socket kTcpHost){
         foreach (var key in Keys.Values) {
+            
             bool newState = IsKeyDown(key.VKey);
             if (key.IsDown != newState) {
-                key.IsDown = newState;
+                
                 key.OnKeyStateChange(newState ? KeyStateChanged.JustPressed : KeyStateChanged.JustReleased,kTcpHost);
             }
+            key.IsDown = newState;
         }
     }
 
     public void OnKeyStateChange(KeyStateChanged ev, Socket kTcpHost){
-        string data = ev == KeyStateChanged.JustPressed ? $"{VKey}On" : $"{VKey}Off";
+        string data = ev == KeyStateChanged.JustPressed ? $"{VKey}1" : $"{VKey}0";
 
         var span = Encoding.UTF8.GetBytes(data);
 
-        Console.WriteLine($"Writing amount|{span.Length}| data");
-        kTcpHost.Send(span);
-        
+        Console.WriteLine($"sending: |{data}|  length:|{span.Length}| data");
+        try {
+            kTcpHost.Send(span);
+        }
+        catch (Exception) {
+            kTcpHost.Dispose();
+            kTcpHost.Close();
+            TcpServer.EndProgram = true;
+        }
     }
 
     public static Key? GetKeyByVKey(int key){
@@ -110,10 +113,11 @@ public class Key
     public void Register(){
         Keys.Add(this.VKey,this);
     }
-    [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
     public static extern short GetKeyState(int nVirtKey);
 
     public static bool IsKeyDown(int nVirtKey){
-        return GetKeyState(nVirtKey) != 0;
+        return GetKeyState(nVirtKey) < 0;
     }
+    
 }
