@@ -7,6 +7,7 @@ using Microsoft.VisualBasic;
 using MultiInput.Enums;
 using MultiInput.Enums.Constants;
 using MultiInput.Inputter;
+using MultiInput.Poller;
 
 namespace MultiInput.TCP;
 
@@ -30,7 +31,9 @@ public class MultiInputTcp
             if (Listener.Pending()) {
                 Console.WriteLine($"Found Pending Request");
                 Client = Listener.AcceptSocket();
+                OnConnect(Client.RemoteEndPoint);
             }
+            
             if (Client is null||!Client.Connected) {
                 if (_connected) {
                     OnDisconnect();
@@ -38,9 +41,15 @@ public class MultiInputTcp
                 _connected = false;
                 return;
             }
-            if (!_connected) {
-                OnConnect(Listener.Server.RemoteEndPoint);
-                _connected = true;
+
+            if (TcpPoll.TimeUntilPollAfterInput(30) is true) {
+                try {
+                    Console.WriteLine($"Sending Poll");
+                    Client.Send(Encoding.UTF8.GetBytes("ping"));
+                }
+                catch (Exception) {
+                    OnDisconnect();
+                }
             }
             Key.UpdateKeys(Client);
         }
@@ -51,27 +60,26 @@ public class MultiInputTcp
         public TcpClient Client = client;
         public IPAddress ConnectionGoesTo = connectionTo;
         public int Port = port;
-        private bool _connected;
+        private bool _lastconnectionstate;
         private KeyboardInput _keyboardInput = new KeyboardInput();
         public void Awake(){
-            _connected = false;
+            _lastconnectionstate = false;
             Console.WriteLine($"Connecting...");
             Client.Connect(ConnectionGoesTo, Port);
         }
         public void Update(){
             if (Client is{ Connected: false, Available: 0}) {
-                if (_connected) {
+                if (_lastconnectionstate) {
                     OnDisconnect();
                 }
-                _connected = false;
+                _lastconnectionstate = false;
                 return;
             }
 
-            if (!_connected) {
+            if (!_lastconnectionstate) {
                 OnConnect(Client.Client.RemoteEndPoint);
-                _connected = true;
+                _lastconnectionstate = true;
             }
-
 
 
             byte[] buffer = new byte[255];
@@ -94,6 +102,7 @@ public class MultiInputTcp
     }
 
     public static void OnDisconnect(){
+        StaticData.WasDisconnected = true;
         Console.WriteLine($"Disconnected");
     }
 }

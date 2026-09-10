@@ -8,6 +8,7 @@ namespace MultiInput;
 
 internal static class TcpServer
 {
+    //16670
     
     private static readonly string RunTime = $"{DateTime.Now}";
     public static bool EndProgram = false;
@@ -28,7 +29,8 @@ internal static class TcpServer
 
                 MultiInputTcp.KTcpHost host = new MultiInputTcp.KTcpHost(TcpListener.Create(tPort));
                 host.Awake();
-                while (!EndProgram) {
+                StaticData.WasDisconnected = false;
+                while (!StaticData.WasDisconnected) {
                     host.Update();
                 }
                 return;
@@ -56,7 +58,8 @@ internal static class TcpServer
 
             var tcpClient = new MultiInputTcp.KTcpClient(new TcpClient(),address,portresult);
             tcpClient.Awake();
-            while (!EndProgram) {
+            StaticData.WasDisconnected = false;
+            while (!StaticData.WasDisconnected) {
                 tcpClient.Update();
             }
         }

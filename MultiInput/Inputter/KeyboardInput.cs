@@ -26,6 +26,10 @@ public class KeyboardInput
             }
             foreach (var str in output.Split('.')) {
                 Console.WriteLine($"orig:{output} for:{str}");
+                if (str == $"ping") {
+                    Console.WriteLine($"Ping Received");
+                    return;
+                }
                 if (!int.TryParse(str[2].ToString(), out int fState) || !int.TryParse(str.Remove(2), out int fKey)) {
                     Console.WriteLine($"Failed To Handle Data {data} LN 45");
                     return;
@@ -83,6 +87,7 @@ public class Key
         Console.WriteLine($"sending: |{data}|  length:|{span.Length}| data");
         try {
             kTcpHost.Send(span);
+            StaticData.TimesinceLastDataSent = DateTime.Now;
         }
         catch (Exception) {
             kTcpHost.Dispose();
