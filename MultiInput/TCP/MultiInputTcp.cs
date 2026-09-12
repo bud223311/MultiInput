@@ -31,6 +31,7 @@ public class MultiInputTcp
             if (Listener.Pending()) {
                 Console.WriteLine($"Found Pending Request");
                 Client = Listener.AcceptSocket();
+                PreConnect();
                 OnConnect(Client.RemoteEndPoint);
             }
             
@@ -44,7 +45,7 @@ public class MultiInputTcp
 
             if (TcpPoll.TimeUntilPollAfterInput(30) is true) {
                 try {
-                    Console.WriteLine($"Sending Poll");
+                    Console.WriteLine($"Sending Ping to Client");
                     Client.Send(Encoding.UTF8.GetBytes("ping"));
                 }
                 catch (Exception) {
@@ -97,6 +98,9 @@ public class MultiInputTcp
         }
     }
 
+    public static void PreConnect(){
+        StaticData.TimesinceLastDataSent = DateTime.Now;
+    }
     public static void OnConnect(EndPoint? clientRemoteEndPoint){
         Console.WriteLine($"Connected to: {clientRemoteEndPoint}");
     }

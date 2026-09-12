@@ -25,28 +25,27 @@ public class KeyboardInput
                     output += data.Substring(i);
             }
             foreach (var str in output.Split('.')) {
-                Console.WriteLine($"orig:{output} for:{str}");
-                if (str == $"ping") {
-                    Console.WriteLine($"Ping Received");
+                if (data.Equals("ping", StringComparison.InvariantCultureIgnoreCase)) {
+                    Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Alive Ping Received");
                     return;
                 }
                 if (!int.TryParse(str[2].ToString(), out int fState) || !int.TryParse(str.Remove(2), out int fKey)) {
-                    Console.WriteLine($"Failed To Handle Data {data} LN 45");
+                    Console.WriteLine($"Failed To Handle Data. DATA:{data}");
                     return;
                 }
 
-                Console.WriteLine($"KEY:{fKey} STATE:{fState}");
+                Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{fKey} STATE:{fState}");
                 SendKeyStroke(fKey,fState);
             }
             return;
         }
 
         if (!int.TryParse(data[2].ToString(), out int state) || !int.TryParse(data.Remove(2), out int key)) {
-            Console.WriteLine($"Failed To Handle Data {data} LN 45");
+            Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Handle Data. DATA:{data}");
             return;
         }
 
-        Console.WriteLine($"KEY:{key} STATE:{state}");
+        Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{key} STATE:{state}");
         SendKeyStroke(key,state);
     }
     
@@ -84,22 +83,22 @@ public class Key
 
         var span = Encoding.UTF8.GetBytes(data);
 
-        Console.WriteLine($"sending: |{data}|  length:|{span.Length}| data");
+        Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
         try {
             kTcpHost.Send(span);
             StaticData.TimesinceLastDataSent = DateTime.Now;
         }
         catch (Exception) {
+            Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. Disconnecting...");
             kTcpHost.Dispose();
             kTcpHost.Close();
-            TcpServer.EndProgram = true;
+            StaticData.WasDisconnected = true;
         }
     }
 
     public static Key? GetKeyByVKey(int key){
         return Keys.FirstOrDefault(x=>x.Key == key).Value;
     }
-
     public static void InitializeKeys(){
         new Key((int)VirtualKeyCode.VK_A).Register();
         new Key((int)VirtualKeyCode.VK_B).Register();
