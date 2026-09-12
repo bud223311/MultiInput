@@ -7,7 +7,8 @@ public static class TcpPoll
             return null;
         }
         if (DateTime.Now > StaticData.TimesinceLastDataSent.Value.AddSeconds(i)) {
-            Console.WriteLine($"PollTrue");
+            StaticData.TimesinceLastDataSent = DateTime.Now;
+            Console.WriteLine($"Sending ping to check connection");
             return true;
         }
         return false;
