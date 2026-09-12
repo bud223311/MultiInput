@@ -93,7 +93,7 @@ public class MultiInputTcp
                 _keyboardInput.Handle(Encoding.UTF8.GetString(buffer),amount);
             }
             catch (Exception e) {
-                Console.WriteLine(e);
+                OnDisconnect();
             }
         }
     }
@@ -107,6 +107,6 @@ public class MultiInputTcp
 
     public static void OnDisconnect(){
         StaticData.WasDisconnected = true;
-        Console.WriteLine($"Disconnected");
+        Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Disconnected");
     }
 }
