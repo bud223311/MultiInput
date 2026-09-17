@@ -137,9 +137,28 @@ public class Key
         new Key((int)VirtualKeyCode.VK_X).Register();
         new Key((int)VirtualKeyCode.VK_Y).Register();
         new Key((int)VirtualKeyCode.VK_Z).Register();
+        
+        new Key((int)VirtualKeyCode.VK_0).Register();
+        new Key((int)VirtualKeyCode.VK_1).Register();
+        new Key((int)VirtualKeyCode.VK_2).Register();
+        new Key((int)VirtualKeyCode.VK_3).Register();
+        new Key((int)VirtualKeyCode.VK_4).Register();
+        new Key((int)VirtualKeyCode.VK_5).Register();
+        new Key((int)VirtualKeyCode.VK_6).Register();
+        new Key((int)VirtualKeyCode.VK_7).Register();
+        new Key((int)VirtualKeyCode.VK_8).Register();
+        new Key((int)VirtualKeyCode.VK_9).Register();
+        
         new Key((int)VirtualKeyCode.SPACE).Register();
+        new Key((int)VirtualKeyCode.MENU).Register();
+        new Key((int)VirtualKeyCode.ESCAPE).Register();
         new Key((int)VirtualKeyCode.BACK).Register();
         new Key((int)VirtualKeyCode.RETURN).Register();
+        new Key((int)VirtualKeyCode.LEFT).Register();
+        new Key((int)VirtualKeyCode.RIGHT).Register();
+        new Key((int)VirtualKeyCode.UP).Register();
+        new Key((int)VirtualKeyCode.DOWN).Register();
+
         //TOGGLE
         new Key((int)VirtualKeyCode.F3).Register();
     }

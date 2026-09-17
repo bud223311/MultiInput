@@ -17,7 +17,7 @@ public class MultiInputTcp
     public class KTcpHost(TcpListener listener)
     {
         public TcpListener Listener = listener;
-        public Socket? Client;
+        public List<Socket?> Clients = new List<Socket?>();
         private bool _connected;
 
         public void Awake(){
@@ -30,35 +30,41 @@ public class MultiInputTcp
         public void Update(){
             if (Listener.Pending()) {
                 Console.WriteLine($"Found Pending Request");
-                Client = Listener.AcceptSocket();
+                Socket? client = Listener.AcceptSocket();
+                Clients.Add(client);
                 PreConnect();
-                OnConnect(Client.RemoteEndPoint);
-            }
-            
-            if (Client is null||!Client.Connected) {
-                if (_connected) {
-                    OnDisconnect();
-                }
-                _connected = false;
-                return;
+                OnConnect(client.RemoteEndPoint);
             }
 
-            if (TcpPoll.TimeUntilPollAfterInput(30) is true) {
-                try {
-                    Console.WriteLine($"Sending Ping to Client");
-                    Client.Send(Encoding.UTF8.GetBytes("ping"));
+            foreach (var client in Clients) {
+                if (client is null||!client.Connected) {
+                    if (_connected) {
+                        OnDisconnect();
+                    }
+                    _connected = false;
+                    return;
                 }
-                catch (Exception) {
-                    OnDisconnect();
+
+                if (TcpPoll.TimeUntilPollAfterInput(30) is true) {
+                    try {
+                        Console.WriteLine($"Sending Ping to Client");
+                        client.Send(Encoding.UTF8.GetBytes("ping"));
+                    }
+                    catch (Exception) {
+                        OnDisconnect();
+                    }
                 }
+                Key.UpdateKeys(client);
             }
-            Key.UpdateKeys(Client);
         }
 
         public void Close(){
-            if (Client is not null) {
-                Client.Close();
+            foreach (var client in Clients) {
+                if (client is not null) {
+                    client.Close();
+                }
             }
+            Clients.Clear();
             Listener.Stop();
             StaticData.Host = null;
         }
