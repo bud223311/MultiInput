@@ -26,14 +26,15 @@ internal static class TcpServer
                 if (!int.TryParse(port,out int tPort)) {
                     continue;
                 }
-
-                MultiInputTcp.KTcpHost host = new MultiInputTcp.KTcpHost(TcpListener.Create(tPort));
-                host.Awake();
+                
+                StaticData.Host = new MultiInputTcp.KTcpHost(TcpListener.Create(tPort));
+                StaticData.Host.Awake();
                 StaticData.WasDisconnected = false;
                 while (!StaticData.WasDisconnected) {
-                    host.Update();
+                    StaticData.Host.Update();
                 }
-                return;
+                StaticData.Host.Close();
+                continue;
             }
 
             if (consoleStr == string.Empty) {
@@ -56,12 +57,13 @@ internal static class TcpServer
                 continue;
             }
 
-            var tcpClient = new MultiInputTcp.KTcpClient(new TcpClient(),address,portresult);
-            tcpClient.Awake();
+            StaticData.Client = new MultiInputTcp.KTcpClient(new TcpClient(),address,portresult);
+            StaticData.Client.Awake();
             StaticData.WasDisconnected = false;
             while (!StaticData.WasDisconnected) {
-                tcpClient.Update();
+                StaticData.Client.Update();
             }
+            StaticData.Client.Close();
         }
     }
 }
