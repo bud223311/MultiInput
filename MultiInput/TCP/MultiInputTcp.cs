@@ -6,6 +6,7 @@ using System.Text.Unicode;
 using Microsoft.VisualBasic;
 using MultiInput.Enums;
 using MultiInput.Enums.Constants;
+using MultiInput.Extensions;
 using MultiInput.Inputter;
 using MultiInput.Poller;
 
@@ -17,12 +18,11 @@ public class MultiInputTcp
     public class KTcpHost(TcpListener listener)
     {
         public TcpListener Listener = listener;
-        public List<Socket?> Clients = new List<Socket?>();
-        private bool _connected;
+        private bool _lastconnectionstate;
 
         public void Awake(){
             Console.WriteLine($"Waiting For Connections...");
-            _connected = false;
+            _lastconnectionstate = false;
             Listener.Start();
             Key.InitializeKeys();
             
@@ -31,17 +31,18 @@ public class MultiInputTcp
             if (Listener.Pending()) {
                 Console.WriteLine($"Found Pending Request");
                 Socket? client = Listener.AcceptSocket();
-                Clients.Add(client);
+                StaticData.Clients.Add(client);
                 PreConnect();
                 OnConnect(client.RemoteEndPoint);
             }
 
-            foreach (var client in Clients) {
-                if (client is null||!client.Connected) {
-                    if (_connected) {
+            foreach (var client in StaticData.Clients) {
+                if (client is null || !client.Connected) {
+                    if (_lastconnectionstate) {
                         OnDisconnect();
                     }
-                    _connected = false;
+
+                    _lastconnectionstate = false;
                     return;
                 }
 
@@ -54,17 +55,18 @@ public class MultiInputTcp
                         OnDisconnect();
                     }
                 }
-                Key.UpdateKeys(client);
             }
+
+            Key.UpdateKeys(StaticData.Clients);
         }
 
         public void Close(){
-            foreach (var client in Clients) {
+            foreach (var client in StaticData.Clients) {
                 if (client is not null) {
                     client.Close();
                 }
             }
-            Clients.Clear();
+            StaticData.Clients.Clear();
             Listener.Stop();
             StaticData.Host = null;
         }
@@ -125,6 +127,7 @@ public class MultiInputTcp
     }
 
     public static void OnDisconnect(){
+        StaticData.Clients.RemoveNulls();
         Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Disconnected");
     }
 }

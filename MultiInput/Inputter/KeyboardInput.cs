@@ -66,19 +66,19 @@ public class Key
     public int VKey;
     public bool IsDown;
 
-    public static void UpdateKeys(Socket kTcpHost){
+    public static void UpdateKeys(List<Socket?> clients){
         foreach (var key in Keys.Values) {
             
             bool newState = IsKeyDown(key.VKey);
             if (key.IsDown != newState) {
                 
-                key.OnKeyStateChange(newState ? KeyStateChanged.JustPressed : KeyStateChanged.JustReleased,kTcpHost);
+                key.OnKeyStateChange(newState ? KeyStateChanged.JustPressed : KeyStateChanged.JustReleased,clients);
             }
             key.IsDown = newState;
         }
     }
 
-    public void OnKeyStateChange(KeyStateChanged ev, Socket kTcpHost){
+    public void OnKeyStateChange(KeyStateChanged ev, List<Socket?> clients){
 
         if (this.VKey == (int)VirtualKeyCode.F3) {
             if (ev == KeyStateChanged.JustPressed) {
@@ -96,13 +96,13 @@ public class Key
 
         Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
         try {
-            kTcpHost.Send(span);
+            foreach (var client in clients) {
+                client?.Send(span);
+            }
             StaticData.TimesinceLastDataSent = DateTime.Now;
         }
         catch (Exception) {
-            Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. Disconnecting...");
-            kTcpHost.Dispose();
-            kTcpHost.Close();
+            Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. ");
             StaticData.WasDisconnected = true;
         }
     }
