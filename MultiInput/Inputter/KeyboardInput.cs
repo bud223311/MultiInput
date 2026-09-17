@@ -79,6 +79,17 @@ public class Key
     }
 
     public void OnKeyStateChange(KeyStateChanged ev, Socket kTcpHost){
+
+        if (this.VKey == (int)VirtualKeyCode.F3) {
+            if (ev == KeyStateChanged.JustPressed) {
+                StaticData.ToggleInput = !StaticData.ToggleInput;
+                Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| TOGGLE INPUT: {StaticData.ToggleInput}");
+            }
+            return;
+        }
+        if (!StaticData.ToggleInput) {
+            return;
+        }
         string data = ev == KeyStateChanged.JustPressed ? $"{VKey}1" : $"{VKey}0";
 
         var span = Encoding.UTF8.GetBytes(data);
@@ -127,6 +138,10 @@ public class Key
         new Key((int)VirtualKeyCode.VK_Y).Register();
         new Key((int)VirtualKeyCode.VK_Z).Register();
         new Key((int)VirtualKeyCode.SPACE).Register();
+        new Key((int)VirtualKeyCode.BACK).Register();
+        new Key((int)VirtualKeyCode.RETURN).Register();
+        //TOGGLE
+        new Key((int)VirtualKeyCode.F3).Register();
     }
 
     public Key(int vKey){

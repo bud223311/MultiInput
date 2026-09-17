@@ -54,6 +54,14 @@ public class MultiInputTcp
             }
             Key.UpdateKeys(Client);
         }
+
+        public void Close(){
+            if (Client is not null) {
+                Client.Close();
+            }
+            Listener.Stop();
+            StaticData.Host = null;
+        }
     }
 
     public class KTcpClient(TcpClient client,IPAddress connectionTo,int port)
@@ -92,9 +100,14 @@ public class MultiInputTcp
                 Console.WriteLine($"Received {amount} of bytes");
                 _keyboardInput.Handle(Encoding.UTF8.GetString(buffer),amount);
             }
-            catch (Exception e) {
+            catch (Exception) {
                 OnDisconnect();
             }
+        }
+
+        public void Close(){
+            Client.Close();
+            StaticData.Client = null;
         }
     }
 
