@@ -11,3 +11,9 @@ public static class StringExtensions
         return checkip.Length is > 2 and < 6;
     }
 }
+public static class ListExtensions
+{
+    public static void RemoveNulls<T>(this List<T?> list) where T : class{
+        list.RemoveAll(item => item is null);
+    }
+}
