@@ -125,7 +125,6 @@ public class MultiInputTcp
     }
 
     public static void OnDisconnect(){
-        StaticData.WasDisconnected = true;
         Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Disconnected");
     }
 }
