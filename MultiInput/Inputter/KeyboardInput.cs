@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Unicode;
 using MultiInput.Enums;
 using MultiInput.Enums.Constants;
+using MultiInput.Logging;
 using MultiInput.TCP;
 using WindowsInput;
 using WindowsInput.Native;
@@ -16,6 +17,7 @@ public class KeyboardInput
     private InputSimulator _inputSimulator = new InputSimulator();
 
     public void Handle(string data,int count){
+        DebugLog.WriteDebugMessage($"Received Data: {data}");
         if (count > 3) {
             string output = string.Empty;
             for (int i = 0; i < count; i += 3) {
@@ -27,14 +29,17 @@ public class KeyboardInput
             foreach (var str in output.Split('.')) {
                 if (data.Equals("ping", StringComparison.InvariantCultureIgnoreCase)) {
                     Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Alive Ping Received");
+                    DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Alive Ping Received");
                     return;
                 }
                 if (!int.TryParse(str[2].ToString(), out int fState) || !int.TryParse(str.Remove(2), out int fKey)) {
                     Console.WriteLine($"Failed To Handle Data. DATA:{data}");
+                    DebugLog.WriteDebugMessage($"Failed To Handle Data. DATA:{data}");
                     return;
                 }
 
                 Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{fKey} STATE:{fState}");
+                DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{fKey} STATE:{fState}");
                 SendKeyStroke(fKey,fState);
             }
             return;
@@ -42,10 +47,12 @@ public class KeyboardInput
 
         if (!int.TryParse(data[2].ToString(), out int state) || !int.TryParse(data.Remove(2), out int key)) {
             Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Handle Data. DATA:{data}");
+            DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Handle Data. DATA:{data}");
             return;
         }
 
         Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{key} STATE:{state}");
+        DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{key} STATE:{state}");
         SendKeyStroke(key,state);
     }
     
@@ -79,7 +86,7 @@ public class Key
     }
 
     public void OnKeyStateChange(KeyStateChanged ev, List<Socket?> clients){
-
+        DebugLog.DebugMessageThread($"KeyData | Key: {VKey} | State: {ev}\nStaticData | InputLock{StaticData.ToggleInput} | {StaticData.Clients}");
         if (this.VKey == (int)VirtualKeyCode.F3) {
             if (ev == KeyStateChanged.JustPressed) {
                 StaticData.ToggleInput = !StaticData.ToggleInput;
@@ -90,12 +97,17 @@ public class Key
         if (!StaticData.ToggleInput) {
             return;
         }
+        if (StaticData.Clients.Count is 0) {
+            return;
+        }
         string data = ev == KeyStateChanged.JustPressed ? $"{VKey}1" : $"{VKey}0";
 
         var span = Encoding.UTF8.GetBytes(data);
 
         Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
+        DebugLog.DebugMessageThread($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
         try {
+            DebugLog.DebugMessageThread($"Attempting to send data to {clients.Count} clients.");
             foreach (var client in clients) {
                 client?.Send(span);
             }
@@ -103,6 +115,7 @@ public class Key
         }
         catch (Exception) {
             Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. ");
+            DebugLog.DebugMessageThread($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. ");
             StaticData.WasDisconnected = true;
         }
     }
