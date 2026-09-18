@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -8,6 +9,7 @@ using MultiInput.Enums;
 using MultiInput.Enums.Constants;
 using MultiInput.Extensions;
 using MultiInput.Inputter;
+using MultiInput.Logging;
 using MultiInput.Poller;
 
 namespace MultiInput.TCP;
@@ -21,7 +23,7 @@ public class MultiInputTcp
         private bool _lastconnectionstate;
 
         public void Awake(){
-            Console.WriteLine($"Waiting For Connections...");
+            ConsoleLog.WriteConsoleMessage($"Waiting For Connections...", ConsoleColor.Cyan);
             _lastconnectionstate = false;
             Listener.Start();
             Key.InitializeKeys();
@@ -29,7 +31,7 @@ public class MultiInputTcp
         }
         public void Update(){
             if (Listener.Pending()) {
-                Console.WriteLine($"Found Pending Request");
+                ConsoleLog.WriteConsoleMessage($"Found Pending Request",ConsoleColor.Green);
                 Socket? client = Listener.AcceptSocket();
                 StaticData.Clients.Add(client);
                 PreConnect();
@@ -57,6 +59,8 @@ public class MultiInputTcp
                 }
             }
 
+            
+
             Key.UpdateKeys(StaticData.Clients);
         }
 
@@ -81,31 +85,31 @@ public class MultiInputTcp
         private KeyboardInput _keyboardInput = new KeyboardInput();
         public void Awake(){
             _lastconnectionstate = false;
-            Console.WriteLine($"Connecting...");
+            ConsoleLog.WriteConsoleMessage($"Connecting...", ConsoleColor.Yellow);
             Client.Connect(ConnectionGoesTo, Port);
         }
         public void Update(){
             if (Client is{ Connected: false, Available: 0}) {
                 if (_lastconnectionstate) {
-                    OnDisconnect();
+                    OnClientDisconnect();
                 }
                 _lastconnectionstate = false;
                 return;
             }
 
             if (!_lastconnectionstate) {
-                OnConnect(Client.Client.RemoteEndPoint);
+                OnClientConnect(Client.Client.RemoteEndPoint);
                 _lastconnectionstate = true;
             }
 
-
+            DebugLog.WriteDebugMessage($"Client Connected: {Client.Connected} | Available: {Client.Available}");
             byte[] buffer = new byte[255];
             try {
                 int amount = Client.Client.Receive(buffer);
                 if (amount is 0) {
                     return;
                 }
-                Console.WriteLine($"Received {amount} of bytes");
+                DebugLog.WriteDebugMessage($"Received {amount} of bytes");
                 _keyboardInput.Handle(Encoding.UTF8.GetString(buffer),amount);
             }
             catch (Exception) {
@@ -122,12 +126,23 @@ public class MultiInputTcp
     public static void PreConnect(){
         StaticData.TimesinceLastDataSent = DateTime.Now;
     }
-    public static void OnConnect(EndPoint? clientRemoteEndPoint){
-        Console.WriteLine($"Connected to: {clientRemoteEndPoint}");
+    public static void OnClientConnect(EndPoint? clientRemoteEndPoint){
+        ConsoleLog.WriteConsoleMessage($"Connected to: {clientRemoteEndPoint}", ConsoleColor.Green);
+    }
+    public static void OnConnect(EndPoint? clientEndPoint){
+        ConsoleLog.WriteConsoleMessage($"Client Connected: {clientEndPoint}", ConsoleColor.Green);
     }
 
-    public static void OnDisconnect(){
+    public static void OnClientDisconnect(){
         StaticData.Clients.RemoveNulls();
+        ConsoleLog.WriteOnlyColoredTimeStamp($"Disconnected | Clients Connected: {StaticData.Clients.Count}", ConsoleColor.Red);
         Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Disconnected");
+    }
+    public static void OnDisconnect(){
+        StaticData.WasDisconnected = true;
+        if (StaticData.Client is not null) {
+            StaticData.Client.Close();
+        }
+        OnClientDisconnect();
     }
 }
