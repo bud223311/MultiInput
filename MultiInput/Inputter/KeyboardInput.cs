@@ -86,7 +86,7 @@ public class Key
     }
 
     public void OnKeyStateChange(KeyStateChanged ev, List<Socket?> clients){
-        DebugLog.DebugMessageThread($"KeyData | Key: {VKey} | State: {ev}\nStaticData | InputLock{StaticData.ToggleInput} | {StaticData.Clients}");
+        DebugLog.DebugMessageThread($"KeyData | Key: {VKey} | State: {ev}\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".",StaticData.Clients.Select(x=>x?.RemoteEndPoint))}");
         if (this.VKey == (int)VirtualKeyCode.F3) {
             if (ev == KeyStateChanged.JustPressed) {
                 StaticData.ToggleInput = !StaticData.ToggleInput;
@@ -116,7 +116,6 @@ public class Key
         catch (Exception) {
             Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. ");
             DebugLog.DebugMessageThread($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. ");
-            StaticData.WasDisconnected = true;
         }
     }
 
