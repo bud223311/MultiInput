@@ -49,26 +49,34 @@ internal static class TcpServer
             }
 
             if (consoleStr == string.Empty) {
-                Console.WriteLine($"consoleStr is Empty");
+                ConsoleLog.WriteConsoleMessage($"No Input Provided", ConsoleColor.Red);
                 continue;
             }
 
             if (!consoleStr.ValidateIpPort()) {
-                Console.WriteLine($"Validation Failed: {consoleStr}");
+                ConsoleLog.WriteConsoleMessage($"Validation Failed: {consoleStr}", ConsoleColor.Red);
+                DebugLog.DebugMessageThread($"Validation Failed: {consoleStr}");
                 continue;
             }
 
             if (!IPAddress.TryParse(consoleStr.Split(':')[0], out var address)) {
-                Console.WriteLine($"IPAddress TryParse Failed: {consoleStr}");
+                ConsoleLog.WriteConsoleMessage($"IPAddress TryParse Failed: {consoleStr}", ConsoleColor.Red);
+                DebugLog.DebugMessageThread($"IPAddress TryParse Failed: {consoleStr}");
                 continue;
             }
 
             if (!int.TryParse(consoleStr.Split(':')[1], out int portresult)) {
-                Console.WriteLine($"Port TryParse Failed: {consoleStr}");
+                ConsoleLog.WriteConsoleMessage($"Port TryParse Failed: {consoleStr}", ConsoleColor.Red);
+                DebugLog.DebugMessageThread($"Port TryParse Failed: {consoleStr}");
                 continue;
             }
             DebugLog.DebugMessageThread($"Connecting to {address}:{portresult}");
-            StaticData.Client = new MultiInputTcp.KTcpClient(new TcpClient(),address,portresult);
+            MultiInputTcp.KTcpClient.InitializeClient(address, portresult);
+            if (StaticData.Client is null) {
+                ConsoleLog.WriteConsoleMessage($"Failed to Initialize Client: {consoleStr}", ConsoleColor.Red);
+                DebugLog.DebugMessageThread($"Failed to Initialize Client: {consoleStr}");
+                continue;
+            }
             StaticData.Client.Awake();
             StaticData.WasDisconnected = false;
             while (!StaticData.WasDisconnected) {
