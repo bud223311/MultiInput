@@ -86,7 +86,14 @@ public class MultiInputTcp
         public void Awake(){
             _lastconnectionstate = false;
             ConsoleLog.WriteConsoleMessage($"Connecting...", ConsoleColor.Yellow);
-            Client.Connect(ConnectionGoesTo, Port);
+            try {
+                Client.Connect(ConnectionGoesTo, Port);
+            }
+            catch (Exception e) {
+                ConsoleLog.WriteConsoleMessage($"Failed to Connect: {e.Message}", ConsoleColor.Red);
+                DebugLog.DebugMessageThread($"Failed to Connect: {e.Message}");
+                OnDisconnect();
+            }
         }
         public void Update(){
             if (Client is{ Connected: false, Available: 0}) {
@@ -143,6 +150,5 @@ public class MultiInputTcp
         if (StaticData.Client is not null) {
             StaticData.Client.Close();
         }
-        OnClientDisconnect();
     }
 }
