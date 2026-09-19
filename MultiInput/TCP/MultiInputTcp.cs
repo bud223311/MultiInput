@@ -63,8 +63,12 @@ public class MultiInputTcp
             }
 
             
-
-            Key.UpdateKeys(StaticData.Clients);
+            if (StaticData.InputType is InputType.Keyboard) {
+                Key.UpdateKeys(StaticData.Clients);
+            }
+            else if (StaticData.InputType is InputType.Controller) {
+                Mouse.UpdateMouse(StaticData.Clients);
+            }
         }
 
         public void Close(){
