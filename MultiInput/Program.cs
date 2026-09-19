@@ -24,7 +24,9 @@ internal static class TcpServer
         while (!EndProgram) {
             ConsoleLog.WriteConsoleMessage($"Connect to a machine running this application using: ip:port e.g (127.0.0.1:7777)\nOr start accepting Connections using accept or a", ConsoleColor.Green);
             string consoleStr = Console.ReadLine() ?? string.Empty;
+            
             DebugLog.DebugMessageThread($"Console Input: {consoleStr}");
+            
             if (consoleStr.ToLowerInvariant() is "exit" or "e" or "quit" or "q") {
                 EndProgram = true;
                 continue;
@@ -33,9 +35,11 @@ internal static class TcpServer
             if (consoleStr.ToLowerInvariant() is "accept" or "a" or "acc") {
                 ConsoleLog.WriteConsoleMessage($"Port in which to accept on?",ConsoleColor.Yellow);
                 string port = Console.ReadLine() ?? string.Empty;
+                
                 if (!int.TryParse(port,out int tPort)) {
                     continue;
                 }
+                
                 DebugLog.DebugMessageThread($"Accepting Connections on Port: {tPort}");
                 MultiInputTcp.KTcpHost.InitializeHost(tPort);
                 if (StaticData.Host is null) {
@@ -43,11 +47,14 @@ internal static class TcpServer
                     DebugLog.DebugMessageThread($"Failed to Initialize Host: {tPort}");
                     continue;
                 }
+                
                 StaticData.Host.Awake();
                 StaticData.WasDisconnected = false;
+                
                 while (!StaticData.WasDisconnected) {
                     StaticData.Host.Update();
                 }
+                
                 DebugLog.DebugMessageThread($"Stopped Accepting Connections on Port: {tPort}");
                 StaticData.Host.Close();
                 continue;
@@ -75,24 +82,30 @@ internal static class TcpServer
                 DebugLog.DebugMessageThread($"Port TryParse Failed: {consoleStr}");
                 continue;
             }
+            
             DebugLog.DebugMessageThread($"Connecting to {address}:{portresult}");
             MultiInputTcp.KTcpClient.InitializeClient(address, portresult);
+            
             if (StaticData.Client is null) {
                 ConsoleLog.WriteConsoleMessage($"Failed to Initialize Client: {consoleStr}", ConsoleColor.Red);
                 DebugLog.DebugMessageThread($"Failed to Initialize Client: {consoleStr}");
                 continue;
             }
+            
             StaticData.Client.Awake();
             StaticData.WasDisconnected = false;
+            
             while (!StaticData.WasDisconnected) {
                 if (StaticData.Client is null){
                     StaticData.WasDisconnected = true;
                 }
                 StaticData.Client?.Update();
             }
+            
             DebugLog.DebugMessageThread($"Disconnected from {address}:{portresult}");
             StaticData.Client?.Close();
         }
+        
         OnCloseProgram(1);
     }
     private static bool OnCloseProgram(int eventType) {
