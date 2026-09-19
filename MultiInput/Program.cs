@@ -10,7 +10,7 @@ namespace MultiInput;
 
 internal static class TcpServer
 {
-    //16670
+    
     
     private static readonly string RunTime = $"{DateTime.Now}";
     public static bool EndProgram = false;
@@ -72,16 +72,20 @@ internal static class TcpServer
             StaticData.Client.Awake();
             StaticData.WasDisconnected = false;
             while (!StaticData.WasDisconnected) {
-                StaticData.Client.Update();
+                if (StaticData.Client is null){
+                    StaticData.WasDisconnected = true;
+                }
+                StaticData.Client?.Update();
             }
             DebugLog.DebugMessageThread($"Disconnected from {address}:{portresult}");
-            StaticData.Client.Close();
+            StaticData.Client?.Close();
         }
         OnCloseProgram(1);
     }
     private static bool OnCloseProgram(int eventType) {
-        ConsoleLog.WriteConsoleMessage($"Closing Program...", ConsoleColor.Red);
+        ConsoleLog.WriteConsoleMessage($"Closing Program...", ConsoleColor.Yellow);
         DebugLog.CreatePreviousDebugLog();
+        ConsoleLog.WriteConsoleMessage($"Program Closed at: {DateTime.Now}", ConsoleColor.Green);
         return false;
     }
     
