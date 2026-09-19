@@ -17,10 +17,10 @@ internal static class TcpServer
 
     //Launch args validation and handling
     public static void Main(string[] args){
-        handler = new ConsoleEventDelegate(OnCloseProgram);
-        SetConsoleCtrlHandler(handler, true);
-        DebugLog.InitializeStartup();
+        OnStartup();
+        
         ConsoleLog.WriteConsoleMessage($"MultiInput TCP Server v1.0.0\nStarted at: {RunTime}\nDebug Log Path: {DebugLog.GetPathOfDebugLog()}", ConsoleColor.Cyan);
+        
         while (!EndProgram) {
             ConsoleLog.WriteConsoleMessage($"Connect to a machine running this application using: ip:port e.g (127.0.0.1:7777)\nOr start accepting Connections using accept or a", ConsoleColor.Green);
             string consoleStr = Console.ReadLine() ?? string.Empty;
@@ -120,4 +120,14 @@ internal static class TcpServer
     private delegate bool ConsoleEventDelegate(int eventType);
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate callback, bool add);
+    
+    public static void InitializeHandler(){
+        handler = new ConsoleEventDelegate(OnCloseProgram);
+        SetConsoleCtrlHandler(handler, true);
+    }
+
+    public static void OnStartup(){
+        DebugLog.InitializeStartup();
+        InitializeHandler();
+    }
 }
