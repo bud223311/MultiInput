@@ -29,7 +29,13 @@ public class MultiInputTcp
             ConsoleLog.WriteConsoleMessage($"Waiting For Connections...", ConsoleColor.Cyan);
             _lastconnectionstate = false;
             Listener.Start();
-            Key.InitializeKeys();
+            if (StaticData.InputType is InputType.Keyboard) {
+                Key.InitializeKeys();
+            }
+
+            if (StaticData.InputType is InputType.Controller) {
+                ControllerReader.XInput.InitializeButtons();
+            }
             
         }
         public void Update(){
@@ -67,7 +73,13 @@ public class MultiInputTcp
                 Key.UpdateKeys(StaticData.Clients);
             }
             else if (StaticData.InputType is InputType.Controller) {
-                Mouse.UpdateMouse(StaticData.Clients);
+                int id = ControllerReader.XInput.GetFirstConnectedController();
+                ControllerReader.TargettedControllerIndex = id;
+                if (id is -1) {
+                    DebugLog.DebugMessageThread($"No Controller Connected");
+                    return;
+                }
+                ControllerReader.XInput.ReadAllButtons();
             }
         }
 

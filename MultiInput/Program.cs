@@ -47,6 +47,24 @@ internal static class TcpServer
                     DebugLog.DebugMessageThread($"Failed to Initialize Host: {tPort}");
                     continue;
                 }
+                ConsoleLog.WriteConsoleMessage($"InputMethod:\n1. Keyboard\n2. Controller");
+                if (!int.TryParse(Console.ReadLine(), out int inputMethod)) {
+                    ConsoleLog.WriteConsoleMessage($"InputMethod TryParse Failed: {consoleStr}", ConsoleColor.Red);
+                    DebugLog.DebugMessageThread($"InputMethod TryParse Failed: {consoleStr}");
+                    continue;
+                }
+                switch (inputMethod) {
+                    case 1:
+                        StaticData.InputType = InputType.Keyboard;
+                        break;
+                    case 2:
+                        StaticData.InputType = InputType.Controller;
+                        break;
+                    default:
+                        ConsoleLog.WriteConsoleMessage($"Invalid InputMethod: {inputMethod}", ConsoleColor.Red);
+                        DebugLog.DebugMessageThread($"Invalid InputMethod: {inputMethod}");
+                        continue;
+                }
                 
                 StaticData.Host.Awake();
                 StaticData.WasDisconnected = false;
@@ -91,24 +109,7 @@ internal static class TcpServer
                 DebugLog.DebugMessageThread($"Failed to Initialize Client: {consoleStr}");
                 continue;
             }
-            ConsoleLog.WriteConsoleMessage($"InputMethod:\n1. Keyboard\n2. Controller");
-            if (!int.TryParse(Console.ReadLine(), out int inputMethod)) {
-                ConsoleLog.WriteConsoleMessage($"InputMethod TryParse Failed: {consoleStr}", ConsoleColor.Red);
-                DebugLog.DebugMessageThread($"InputMethod TryParse Failed: {consoleStr}");
-                continue;
-            }
-            switch (inputMethod) {
-                case 1:
-                    StaticData.InputType = InputType.Keyboard;
-                    break;
-                case 2:
-                    StaticData.InputType = InputType.Controller;
-                    break;
-                default:
-                    ConsoleLog.WriteConsoleMessage($"Invalid InputMethod: {inputMethod}", ConsoleColor.Red);
-                    DebugLog.DebugMessageThread($"Invalid InputMethod: {inputMethod}");
-                    continue;
-            }
+            
 
             StaticData.Client.Awake();
             StaticData.WasDisconnected = false;
