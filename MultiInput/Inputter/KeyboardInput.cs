@@ -17,32 +17,85 @@ public class KeyboardInput
     private InputSimulator _inputSimulator = new InputSimulator();
 
     public void Handle(string data,int count){
-        DebugLog.WriteDebugMessage($"Received Data: {data}");
+        DebugLog.WriteDebugMessage($"Received: {data}");
         if (count > 3) {
-            string output = string.Empty;
-            for (int i = 0; i < count; i += 3) {
-                if (i + 3 < count)
-                    output += data.Substring(i, 3) + ".";
-                else
-                    output += data.Substring(i);
+            if (data.Equals("ping", StringComparison.InvariantCultureIgnoreCase)) {
+                Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Alive Ping Received");
+                DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Alive Ping Received");
+                return;
             }
-            foreach (var str in output.Split('.')) {
-                if (data.Equals("ping", StringComparison.InvariantCultureIgnoreCase)) {
-                    Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Alive Ping Received");
-                    DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Alive Ping Received");
-                    return;
-                }
-                if (!int.TryParse(str[2].ToString(), out int fState) || !int.TryParse(str.Remove(2), out int fKey)) {
-                    Console.WriteLine($"Failed To Handle Data. DATA:{data}");
-                    DebugLog.WriteDebugMessage($"Failed To Handle Data. DATA:{data}");
-                    return;
-                }
+            
+            var strs = data.Split('.');
 
+
+            if (!int.TryParse(strs[0], out int inputType)) {
+                Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse Input Type. DATA:{data}");
+                DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse Input Type. DATA:{data}");
+                return;
+            }
+            string fKey = strs[1];
+            if (fKey == string.Empty) {
+                Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse Key. DATA:{data}");
+                DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse Key. DATA:{data}");
+                return;
+            }
+            if (int.TryParse(strs[2], out int fState)) {
+                Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse State. DATA:{data}");
+                DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse State. DATA:{data}");
+                return;
+            }
+            //Keyboard Input
+            if (inputType is 0) {
+                if (!int.TryParse(fKey, out int fKeyInt)) {
+                    Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse Key. DATA:{data}");
+                    DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse Key. DATA:{data}");
+                    return;
+                }
+                
                 Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{fKey} STATE:{fState}");
                 DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{fKey} STATE:{fState}");
-                SendKeyStroke(fKey,fState);
+                SendKeyStroke(fKeyInt, fState);
+                return;
             }
-            return;
+            //Controller Input
+            if (inputType is 1) {
+                Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| CONTROLLER INPUT | KEY:{fKey} STATE:{fState}");
+                DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| CONTROLLER INPUT | KEY:{fKey} STATE:{fState}");
+                switch (fKey) {
+                    case $"A":
+                        SendKeyStroke((int)VirtualKeyCode.SPACE, fState);
+                        break;
+                    case $"B":
+                        SendKeyStroke((int)VirtualKeyCode.LCONTROL, fState);
+                        break;
+                    case $"X":
+                        SendKeyStroke((int)VirtualKeyCode.VK_F, fState);
+                        break;
+                    case $"Y":
+                        SendKeyStroke((int)VirtualKeyCode.VK_V, fState);
+                        break;
+                    case $"LeftShoulder":
+                        SendKeyStroke((int)VirtualKeyCode.VK_Q, fState);
+                        break;
+                    case $"RightShoulder":
+                        SendKeyStroke((int)VirtualKeyCode.VK_E, fState);
+                        break;
+                    case $"DPadUp":
+                        SendKeyStroke((int)VirtualKeyCode.UP, fState);
+                        break;
+                    case $"DPadDown":
+                        SendKeyStroke((int)VirtualKeyCode.DOWN, fState);
+                        break;
+                    case $"DPadLeft":
+                        SendKeyStroke((int)VirtualKeyCode.LEFT, fState);
+                        break;
+                    case $"DPadRight":
+                        SendKeyStroke((int)VirtualKeyCode.RIGHT, fState);
+                        break;
+                }
+            }
+
+            
         }
 
         if (!int.TryParse(data[2].ToString(), out int state) || !int.TryParse(data.Remove(2), out int key)) {
@@ -94,21 +147,22 @@ public class Key
             }
             return;
         }
-        if (!StaticData.ToggleInput) {
-            return;
-        }
         if (StaticData.Clients.Count is 0) {
             return;
         }
-        string data = ev == KeyStateChanged.JustPressed ? $"{VKey}1" : $"{VKey}0";
+        if (!StaticData.ToggleInput) {
+            return;
+        }
+        
+        string data = ev == KeyStateChanged.JustPressed ? $"{VKey}.1" : $"{VKey}.0";
 
-        var span = Encoding.UTF8.GetBytes(data);
+        var span = Encoding.UTF8.GetBytes($"0.{data}");
 
         Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
         DebugLog.DebugMessageThread($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
         try {
-            DebugLog.DebugMessageThread($"Attempting to send data to {clients.Count} clients.");
-            foreach (var client in clients) {
+            DebugLog.DebugMessageThread($"Attempting to send data to {StaticData.Clients.Count} clients.");
+            foreach (var client in StaticData.Clients) {
                 client?.Send(span);
             }
             StaticData.TimesinceLastDataSent = DateTime.Now;
