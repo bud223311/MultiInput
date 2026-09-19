@@ -83,6 +83,10 @@ public class MultiInputTcp
         public int Port = port;
         private bool _lastconnectionstate;
         private KeyboardInput _keyboardInput = new KeyboardInput();
+
+        public static void InitializeClient(IPAddress address, int portresult){
+            StaticData.Client = new KTcpClient(new TcpClient(),address,portresult);
+        }
         public void Awake(){
             _lastconnectionstate = false;
             ConsoleLog.WriteConsoleMessage($"Connecting...", ConsoleColor.Yellow);
