@@ -21,6 +21,9 @@ public class MultiInputTcp
     {
         public TcpListener Listener = listener;
         private bool _lastconnectionstate;
+        public static void InitializeHost(int port){
+            StaticData.Host = new KTcpHost(TcpListener.Create(port));
+        }
 
         public void Awake(){
             ConsoleLog.WriteConsoleMessage($"Waiting For Connections...", ConsoleColor.Cyan);

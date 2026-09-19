@@ -37,7 +37,12 @@ internal static class TcpServer
                     continue;
                 }
                 DebugLog.DebugMessageThread($"Accepting Connections on Port: {tPort}");
-                StaticData.Host = new MultiInputTcp.KTcpHost(TcpListener.Create(tPort));
+                MultiInputTcp.KTcpHost.InitializeHost(tPort);
+                if (StaticData.Host is null) {
+                    ConsoleLog.WriteConsoleMessage($"Failed to Initialize Host: {tPort}", ConsoleColor.Red);
+                    DebugLog.DebugMessageThread($"Failed to Initialize Host: {tPort}");
+                    continue;
+                }
                 StaticData.Host.Awake();
                 StaticData.WasDisconnected = false;
                 while (!StaticData.WasDisconnected) {
