@@ -39,13 +39,13 @@ public class KeyboardInput
                 DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse Key. DATA:{data}");
                 return;
             }
-            if (int.TryParse(strs[2], out int fState)) {
+            if (!int.TryParse(strs[2], out int fState)) {
                 Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse State. DATA:{data}");
                 DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse State. DATA:{data}");
                 return;
             }
-            //Keyboard Input
-            if (inputType is 0) {
+            
+            if (inputType is (int)InputType.Keyboard) {
                 if (!int.TryParse(fKey, out int fKeyInt)) {
                     Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse Key. DATA:{data}");
                     DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse Key. DATA:{data}");
@@ -57,8 +57,8 @@ public class KeyboardInput
                 SendKeyStroke(fKeyInt, fState);
                 return;
             }
-            //Controller Input
-            if (inputType is 1) {
+            
+            if (inputType is (int)InputType.Controller) {
                 Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| CONTROLLER INPUT | KEY:{fKey} STATE:{fState}");
                 DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| CONTROLLER INPUT | KEY:{fKey} STATE:{fState}");
                 switch (fKey) {
@@ -92,21 +92,15 @@ public class KeyboardInput
                     case $"DPadRight":
                         SendKeyStroke((int)VirtualKeyCode.RIGHT, fState);
                         break;
+                    case $"Start":
+                        SendKeyStroke((int)VirtualKeyCode.RETURN, fState);
+                        break;
+                    case $"Back":
+                        SendKeyStroke((int)VirtualKeyCode.ESCAPE, fState);
+                        break;
                 }
             }
-
-            
         }
-
-        if (!int.TryParse(data[2].ToString(), out int state) || !int.TryParse(data.Remove(2), out int key)) {
-            Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Handle Data. DATA:{data}");
-            DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Handle Data. DATA:{data}");
-            return;
-        }
-
-        Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{key} STATE:{state}");
-        DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{key} STATE:{state}");
-        SendKeyStroke(key,state);
     }
     
     
