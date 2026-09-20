@@ -63,7 +63,7 @@ public class MultiInputTcp
                         client.Send(Encoding.UTF8.GetBytes("ping"));
                     }
                     catch (Exception) {
-                        OnDisconnect();
+                        ConsoleLog.WriteConsoleMessage($"Failed to Send ping");
                     }
                 }
             }
