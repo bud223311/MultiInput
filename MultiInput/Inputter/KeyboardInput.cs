@@ -120,6 +120,12 @@ public class KeyboardInput
         PressedKeys.Remove(key);
         _inputSimulator.Keyboard.KeyUp((VirtualKeyCode)key);
     }
+
+    public static void ReleaseAll(){
+        foreach (var virtualKey in PressedKeys) {
+            SendKeyStroke(virtualKey,0);
+        }
+    }
 }
 
 

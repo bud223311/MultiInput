@@ -169,9 +169,10 @@ public class MultiInputTcp
         Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Disconnected");
     }
     public static void OnDisconnect(){
+        KeyboardInput.ReleaseAll();
+        
         StaticData.WasDisconnected = true;
-        if (StaticData.Client is not null) {
-            StaticData.Client.Close();
-        }
+        
+        StaticData.Client?.Close();
     }
 }
