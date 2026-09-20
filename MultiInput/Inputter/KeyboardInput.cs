@@ -14,7 +14,8 @@ namespace MultiInput.Inputter;
 
 public class KeyboardInput
 {
-    private InputSimulator _inputSimulator = new InputSimulator();
+    private static InputSimulator _inputSimulator = new InputSimulator();
+    private static List<int> PressedKeys = new List<int>();
 
     public void Handle(string data,int count){
         DebugLog.WriteDebugMessage($"Received: {data}");
@@ -102,17 +103,26 @@ public class KeyboardInput
             }
         }
     }
+
+    public static List<int> GetUpVirtualKeys(){
+        return PressedKeys;
+    }
     
     
     
-    public void SendKeyStroke(int key,int state){
+    public static void SendKeyStroke(int key,int state){
         if (state == 1) {
+            PressedKeys.Add(key);
             _inputSimulator.Keyboard.KeyDown((VirtualKeyCode)key);
             return;
         }
+
+        PressedKeys.Remove(key);
         _inputSimulator.Keyboard.KeyUp((VirtualKeyCode)key);
     }
 }
+
+
 
 public class Key
 {

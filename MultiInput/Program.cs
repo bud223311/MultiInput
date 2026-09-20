@@ -2,7 +2,9 @@
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using MultiInput.Enums.Constants;
 using MultiInput.Extensions;
+using MultiInput.Inputter;
 using MultiInput.Logging;
 using MultiInput.TCP;
 
@@ -129,6 +131,9 @@ internal static class TcpServer
     }
     private static bool OnCloseProgram(int eventType) {
         ConsoleLog.WriteConsoleMessage($"Closing Program...", ConsoleColor.Yellow);
+        foreach (var virtualKey in KeyboardInput.GetUpVirtualKeys()) {
+            KeyboardInput.SendKeyStroke(virtualKey,0);
+        }
         DebugLog.CreatePreviousDebugLog();
         ConsoleLog.WriteConsoleMessage($"Program Closed at: {DateTime.Now}", ConsoleColor.Green);
         return false;
