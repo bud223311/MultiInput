@@ -139,7 +139,7 @@ internal static class TcpServer
         return false;
     }
     
-    static ConsoleEventDelegate handler;   // Keeps it from getting garbage collected
+    static ConsoleEventDelegate handler;   
     // Pinvoke
     private delegate bool ConsoleEventDelegate(int eventType);
     [DllImport("kernel32.dll", SetLastError = true)]
@@ -151,7 +151,7 @@ internal static class TcpServer
     }
 
     public static void OnStartup(){
-        DebugLog.InitializeStartup();
         InitializeHandler();
+        DebugLog.InitializeStartup();
     }
 }
