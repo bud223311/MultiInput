@@ -131,9 +131,7 @@ internal static class TcpServer
     }
     private static bool OnCloseProgram(int eventType) {
         ConsoleLog.WriteConsoleMessage($"Closing Program...", ConsoleColor.Yellow);
-        foreach (var virtualKey in KeyboardInput.GetUpVirtualKeys()) {
-            KeyboardInput.SendKeyStroke(virtualKey,0);
-        }
+        KeyboardInput.ReleaseAll();
         DebugLog.CreatePreviousDebugLog();
         ConsoleLog.WriteConsoleMessage($"Program Closed at: {DateTime.Now}", ConsoleColor.Green);
         return false;
