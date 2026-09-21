@@ -44,8 +44,7 @@ public static class DebugLog
     }
 
     public static void DebugMessageThread(string message, bool includeTimeStamp = true){
-        Thread debugThread = new Thread(() => WriteDebugMessage(message, includeTimeStamp));
-        debugThread.Start();
+        new Thread(() => WriteDebugMessage(message, includeTimeStamp)).Start();
     }
     public static void WriteDebugMessage(string message, bool includeTimeStamp = true){
         
