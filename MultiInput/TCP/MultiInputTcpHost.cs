@@ -96,9 +96,14 @@ public partial class MultiInputTcp
         }
 
         public void OnConnect(EndPoint? endPoint){
-            
+            ConsoleLog.WriteConsoleMessage($"{endPoint} Connected");
         }
-
+        
+        /// <summary>
+        /// Returns True if Any Data was sent
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public bool TrySendToAll(byte[] data){
             bool flag = false;
             foreach (var client in StaticData.Clients) {
