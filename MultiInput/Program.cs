@@ -43,7 +43,7 @@ internal static class TcpServer
                 }
                 
                 DebugLog.DebugMessageThread($"Accepting Connections on Port: {tPort}");
-                MultiInputTcp.KTcpHost.InitializeHost(tPort);
+                MultiInputTcp.MultiInputTcpHost.InitializeHost(tPort);
                 if (StaticData.Host is null) {
                     ConsoleLog.WriteConsoleMessage($"Failed to Initialize Host: {tPort}", ConsoleColor.Red);
                     DebugLog.DebugMessageThread($"Failed to Initialize Host: {tPort}");
@@ -104,7 +104,7 @@ internal static class TcpServer
             }
             
             DebugLog.DebugMessageThread($"Connecting to {address}:{portresult}");
-            MultiInputTcp.KTcpClient.InitializeClient(address, portresult);
+            MultiInputTcp.MultiInputTcpClient.InitializeClient(address, portresult);
             
             if (StaticData.Client is null) {
                 ConsoleLog.WriteConsoleMessage($"Failed to Initialize Client: {consoleStr}", ConsoleColor.Red);

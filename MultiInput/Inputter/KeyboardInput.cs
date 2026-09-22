@@ -136,7 +136,7 @@ public class Key
     public int VKey;
     public bool IsDown;
 
-    public static void UpdateKeys(List<Socket?> clients){
+    public static void UpdateKeys(List<Socket> clients){
         foreach (var key in Keys.Values) {
             
             bool newState = IsKeyDown(key.VKey);
