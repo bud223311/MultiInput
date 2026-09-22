@@ -10,9 +10,9 @@ public static class StaticData
     public static bool WasDisconnected = false;
     internal static bool ToggleInput = true;
     public static InputType InputType;
-    public static MultiInputTcp.KTcpHost? Host;
-    public static MultiInputTcp.KTcpClient? Client;
-    public static List<Socket?> Clients = new List<Socket?>();
+    public static MultiInputTcp.MultiInputTcpHost? Host;
+    public static MultiInputTcp.MultiInputTcpClient? Client;
+    public static List<Socket> Clients = new List<Socket>();
 }
 
 public enum InputType
