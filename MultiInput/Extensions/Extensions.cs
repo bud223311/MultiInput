@@ -1,4 +1,7 @@
-﻿namespace MultiInput.Extensions;
+﻿using System.Net.Sockets;
+using MultiInput.Logging;
+
+namespace MultiInput.Extensions;
 
 public static class StringExtensions
 {
@@ -15,5 +18,10 @@ public static class ListExtensions
 {
     public static void RemoveNulls<T>(this List<T?> list) where T : class{
         list.RemoveAll(item => item is null);
+    }
+
+    public static void RemoveDisconnected(this List<Socket> list){
+        int count = list.RemoveAll(x => !x.Connected);
+        ConsoleLog.WriteConsoleMessage($"Removing {count} clients");
     }
 }
