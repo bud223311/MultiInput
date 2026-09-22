@@ -46,13 +46,16 @@ public partial class MultiInputTcp
             if (StaticData.Clients.Count == 0) {
                 return;
             }
-
-            List<Socket> disconnectedSockets = new List<Socket>();
-            foreach (var client in StaticData.Clients) {
+            /*
+             * List<Socket> disconnectedSockets = new List<Socket>();
+                foreach (var client in StaticData.Clients) {
                 if (!client.Connected) {
                     disconnectedSockets.Add(client);
                 }
             }
+             */
+
+            var disconnectedSockets = StaticData.Clients.Where(client => !client.Connected).ToList();
             //92.17.121.207
             foreach (var disconnectedSocket in disconnectedSockets) {
                 OnDisconnect(disconnectedSocket);
