@@ -23,7 +23,7 @@ public partial class MultiInputTcp
             _lastconnectionstate = false;
             Listener.Start();
             if (StaticData.InputType is InputType.Keyboard) {
-                Key.InitializeKeys();
+                KeyboardReader.InitializeKeys();
             }
 
             if (StaticData.InputType is InputType.Controller) {
@@ -69,7 +69,7 @@ public partial class MultiInputTcp
             
             switch (StaticData.InputType) {
                 case InputType.Keyboard:
-                    Key.UpdateKeys(StaticData.Clients);
+                    KeyboardReader.UpdateKeys(StaticData.Clients);
                     break;
                 case InputType.Controller:
                 {
@@ -104,12 +104,13 @@ public partial class MultiInputTcp
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public bool TrySendToAll(byte[] data){
+        public static bool TrySendToAll(byte[] data){
             bool flag = false;
             foreach (var client in StaticData.Clients) {
                 try {
                     client.Send(data);
                     flag = true;
+                    
                 }
                 catch (Exception e) {
                     DebugLog.WriteDebugMessage($"Failed To Send Data to Client {client.RemoteEndPoint} {e.Message}");
