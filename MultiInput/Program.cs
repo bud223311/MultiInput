@@ -13,7 +13,6 @@ namespace MultiInput;
 internal static class TcpServer
 {
     
-    
     private static readonly string RunTime = $"{DateTime.Now}";
     public static bool EndProgram = false;
 
@@ -134,18 +133,20 @@ internal static class TcpServer
         KeyboardInput.ReleaseAll();
         DebugLog.CreatePreviousDebugLog();
         ConsoleLog.WriteConsoleMessage($"Program Closed at: {DateTime.Now}", ConsoleColor.Green);
+        StaticData.DualSense?.EndPolling();
+        StaticData.DualSense?.Release();
         return false;
     }
-    
-    static ConsoleEventDelegate handler;   
+
+    private static ConsoleEventDelegate _handler = null!;   
     // Pinvoke
     private delegate bool ConsoleEventDelegate(int eventType);
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate callback, bool add);
     
     public static void InitializeHandler(){
-        handler = new ConsoleEventDelegate(OnCloseProgram);
-        SetConsoleCtrlHandler(handler, true);
+        _handler = new ConsoleEventDelegate(OnCloseProgram);
+        SetConsoleCtrlHandler(_handler, true);
     }
 
     public static void OnStartup(){
