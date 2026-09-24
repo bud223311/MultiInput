@@ -14,8 +14,8 @@ public partial class MultiInputTcp
     public class MultiInputTcpHost(TcpListener listener)
     {
         public TcpListener Listener = listener;
-        private bool _restrictLogSpamming = false;
-        private bool _hasvibratedController = false;
+        private bool _restrictLogSpamming;
+        private bool _hasvibratedController;
         public static void InitializeHost(int port){
             StaticData.Host = new MultiInputTcpHost(TcpListener.Create(port));
         }
@@ -41,7 +41,7 @@ public partial class MultiInputTcp
                 if (!PreConnect()) {
                     return;
                 }
-                Socket? client = Listener.AcceptSocket();
+                Socket client = Listener.AcceptSocket();
                 StaticData.Clients.Add(client);
                 
                 OnConnect(client.RemoteEndPoint);
@@ -133,7 +133,7 @@ public partial class MultiInputTcp
                 try {
                     client.Send(data);
                     flag = true;
-                    
+                    StaticData.TimesinceLastDataSent = DateTime.Now;
                 }
                 catch (Exception e) {
                     DebugLog.WriteDebugMessage($"Failed To Send Data to Client {client.RemoteEndPoint} {e.Message}");

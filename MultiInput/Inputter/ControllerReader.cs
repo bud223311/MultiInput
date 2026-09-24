@@ -68,7 +68,7 @@ public static class ControllerReader
             // if (StaticData.Clients.Count is 0) {
             //     return;
             // }
-            DebugLog.DebugMessageThread($"KeyData | Key: {Button} | State: On\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".",StaticData.Clients.Select(x=>x?.RemoteEndPoint))}");
+            DebugLog.DebugMessageThread($"KeyData | Key: {Button} | State: On\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".",StaticData.Clients.Select(x=>x.RemoteEndPoint))}");
 
             if (!StaticData.ToggleInput) {
                 return;
@@ -76,20 +76,8 @@ public static class ControllerReader
             //First Number identifies it as a controller input, last number is on state
             string data = $"1.{Button}.1";
             byte[] span = Encoding.UTF8.GetBytes(data);
-            
-            Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
-            DebugLog.DebugMessageThread($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
-            try {
-                DebugLog.DebugMessageThread($"Attempting to send data to {StaticData.Clients.Count} clients.");
-                foreach (var client in StaticData.Clients) {
-                    client?.Send(span);
-                }
-                StaticData.TimesinceLastDataSent = DateTime.Now;
-            }
-            catch (Exception) {
-                Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. ");
-                DebugLog.DebugMessageThread($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. ");
-            }
+
+            MultiInputTcp.MultiInputTcpHost.TrySendToAll(span);
 
 
         }
@@ -97,7 +85,7 @@ public static class ControllerReader
             // if (StaticData.Clients.Count is 0) {
             //     return;
             // }
-            DebugLog.DebugMessageThread($"KeyData | Key: {Button} | State: Off\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".",StaticData.Clients.Select(x=>x?.RemoteEndPoint))}");
+            DebugLog.DebugMessageThread($"KeyData | Key: {Button} | State: Off\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".",StaticData.Clients.Select(x=>x.RemoteEndPoint))}");
 
             if (!StaticData.ToggleInput) {
                 return;
@@ -105,20 +93,8 @@ public static class ControllerReader
             //First Number identifies it as a controller input, last number is on state
             string data = $"1.{Button}.0";
             byte[] span = Encoding.UTF8.GetBytes(data);
-            
-            Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
-            DebugLog.DebugMessageThread($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
-            try {
-                DebugLog.DebugMessageThread($"Attempting to send data to {StaticData.Clients.Count} clients.");
-                foreach (var client in StaticData.Clients) {
-                    client?.Send(span);
-                }
-                StaticData.TimesinceLastDataSent = DateTime.Now;
-            }
-            catch (Exception) {
-                Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. ");
-                DebugLog.DebugMessageThread($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. ");
-            }
+
+            MultiInputTcp.MultiInputTcpHost.TrySendToAll(span);
         }
     }
 	

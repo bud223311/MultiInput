@@ -30,15 +30,9 @@ public enum ControllerInputType
     DualSense
 }
 
-public class Data
+public class Data(InputType inputType, string key, int state)
 {
-    public InputType InputType;
-    public string Key;
-    public int State;
-    
-    public Data(InputType inputType,string key,int state){
-        InputType = inputType;
-        Key = key;
-        State = state;
-    }
+    public InputType InputType = inputType;
+    public string Key = key;
+    public int State = state;
 }

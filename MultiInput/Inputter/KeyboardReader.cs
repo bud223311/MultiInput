@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using MultiInput.Enums.Constants;
 using MultiInput.Logging;
+using MultiInput.TCP;
 using WindowsInput.Native;
 
 namespace MultiInput.Inputter;
@@ -26,7 +27,7 @@ public class KeyboardReader
     }
 
     public void OnKeyStateChange(KeyStateChanged ev, List<Socket> clients){
-        DebugLog.DebugMessageThread($"KeyData | Key: {VKey} | State: {ev}\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".",StaticData.Clients.Select(x=>x?.RemoteEndPoint))}");
+        DebugLog.DebugMessageThread($"KeyData | Key: {VKey} | State: {ev}\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".",StaticData.Clients.Select(x=>x.RemoteEndPoint))}");
         if (this.VKey == (int)VirtualKeyCode.F3) {
             if (ev == KeyStateChanged.JustPressed) {
                 StaticData.ToggleInput = !StaticData.ToggleInput;
@@ -47,17 +48,7 @@ public class KeyboardReader
 
         Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
         DebugLog.DebugMessageThread($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
-        try {
-            DebugLog.DebugMessageThread($"Attempting to send data to {StaticData.Clients.Count} clients.");
-            foreach (var client in StaticData.Clients) {
-                client?.Send(span);
-            }
-            StaticData.TimesinceLastDataSent = DateTime.Now;
-        }
-        catch (Exception) {
-            Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. ");
-            DebugLog.DebugMessageThread($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed to send data to remote host. ");
-        }
+        MultiInputTcp.MultiInputTcpHost.TrySendToAll(span);
     }
 
     public static KeyboardReader? GetKeyByVKey(int key){
