@@ -1,12 +1,56 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
+using DualSenseAPI;
+using DualSenseAPI.State;
 using MultiInput.Logging;
+using MultiInput.TCP;
+using MultiInput.Timer;
 
 namespace MultiInput.Inputter;
 
 public static class ControllerReader
 {
     public static int TargettedControllerIndex = -1;
+
+    public static bool TryGetDualShockController(){
+        DualSense? dualSense = DualSense.EnumerateControllers().FirstOrDefault();
+        if (dualSense is null) {
+            StaticData.ControllerInputType = ControllerInputType.XInput;
+            return false;
+        }
+
+        StaticData.DualSense = dualSense;
+        StaticData.DualSense.Acquire();
+        StaticData.DualSense.OnButtonStateChanged += OnDualShockControllerStateChange;
+        StaticData.DualSense.BeginPolling(20);
+        StaticData.DualSense.OutputState.LeftRumble = 1f;
+        StaticData.DualSense.OutputState.RightRumble = 1f;
+        WaitingTimer.WaitForMilliseconds(300);
+        StaticData.DualSense.OutputState.LeftRumble = 0f;
+        StaticData.DualSense.OutputState.RightRumble = 0f;
+        StaticData.ControllerInputType = ControllerInputType.DualSense;
+        return true;
+    }
+
+    private static void OnDualShockControllerStateChange(DualSense sender, DualSenseInputStateButtonDelta changes){
+        
+        /*if (changes.SquareButton == ButtonDeltaState.Pressed) {
+            MultiInputTcp.MultiInputTcpHost.TrySendToAll(Encoding.UTF8.GetBytes($"1.X.1"));
+        }*/
+        
+        switch (changes.DPadLeftButton) {
+            case ButtonDeltaState.Pressed:
+                MultiInputTcp.MultiInputTcpHost.TrySendToAll(Encoding.UTF8.GetBytes($"1.DPadLeft.1"));
+                break;
+            case ButtonDeltaState.Released:
+                MultiInputTcp.MultiInputTcpHost.TrySendToAll(Encoding.UTF8.GetBytes($"1.DPadLeft.0"));
+                break;
+        }
+
+        // if (changes.SquareButton == ButtonDeltaState.Released) {
+        //     MultiInputTcp.MultiInputTcpHost.TrySendToAll(Encoding.UTF8.GetBytes($"1.X.0"));
+        // }
+    }
     public class ButtonState
     {
         public static List<ButtonState> AllButtons = new List<ButtonState>();
