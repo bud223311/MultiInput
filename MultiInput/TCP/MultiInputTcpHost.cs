@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using MultiInput.ControllerUtils;
 using MultiInput.Extensions;
 using MultiInput.Inputter;
 using MultiInput.Logging;
@@ -96,9 +97,7 @@ public partial class MultiInputTcp
 
                     if (!_hasvibratedController) {
                         _hasvibratedController = true;
-                        ControllerReader.XInput.SetVibration((uint)ControllerReader.TargettedControllerIndex,1f,1f);
-                        WaitingTimer.WaitForMilliseconds(600);
-                        ControllerReader.XInput.SetVibration((uint)ControllerReader.TargettedControllerIndex,0f,0f);
+                        ControllerUtilities.CreateThreadedControllerVibrationStartup(ControllerInputType.XInput);
                     }
 
                     _restrictLogSpamming = false;
