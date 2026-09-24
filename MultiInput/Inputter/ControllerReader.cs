@@ -2,6 +2,7 @@
 using System.Text;
 using DualSenseAPI;
 using DualSenseAPI.State;
+using MultiInput.ControllerUtils;
 using MultiInput.Logging;
 using MultiInput.TCP;
 using MultiInput.Timer;
@@ -23,11 +24,8 @@ public static class ControllerReader
         StaticData.DualSense.Acquire();
         StaticData.DualSense.OnButtonStateChanged += OnDualShockControllerStateChange;
         StaticData.DualSense.BeginPolling(20);
-        StaticData.DualSense.OutputState.LeftRumble = 1f;
-        StaticData.DualSense.OutputState.RightRumble = 1f;
-        WaitingTimer.WaitForMilliseconds(500);
-        StaticData.DualSense.OutputState.LeftRumble = 0f;
-        StaticData.DualSense.OutputState.RightRumble = 0f;
+        ControllerUtilities.CreateThreadedControllerVibrationStartup(ControllerInputType.DualSense);
+        
         StaticData.ControllerInputType = ControllerInputType.DualSense;
         return true;
     }
