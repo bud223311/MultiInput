@@ -1,8 +1,5 @@
 ﻿using System.Net;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-using MultiInput.Enums.Constants;
 using MultiInput.Extensions;
 using MultiInput.Inputter;
 using MultiInput.Logging;
@@ -14,7 +11,7 @@ internal static class TcpServer
 {
     
     private static readonly string RunTime = $"{DateTime.Now}";
-    public static bool EndProgram = false;
+    public static bool EndProgram;
 
     //Launch args validation and handling
     public static void Main(string[] args){
@@ -145,7 +142,7 @@ internal static class TcpServer
     private static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate callback, bool add);
     
     public static void InitializeHandler(){
-        _handler = new ConsoleEventDelegate(OnCloseProgram);
+        _handler = OnCloseProgram;
         SetConsoleCtrlHandler(_handler, true);
     }
 
