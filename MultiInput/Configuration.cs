@@ -7,10 +7,17 @@ public static class Configuration
     public static readonly string ConfigLocation = $@"{Environment.CurrentDirectory}\Config";
     public static readonly string ConfigFile = $@"{ConfigLocation}\MultiInputConfig.txt";
     public static StreamReader? StreamReader;
+    //TODO Test if Ts even works cause I'm too trtirted Zzz
     
     public static void ReadConfig(){
         StreamReader = new StreamReader(ConfigFile);
         try {
+            string? reinitializationLine = StreamReader.ReadLine();
+            if (reinitializationLine is null || !reinitializationLine.StartsWith('*')) {
+                WriteFreshConfig();
+                return;
+            }
+
             while (!StreamReader.EndOfStream) {
                 string? line = StreamReader.ReadLine();
                 if (line is null) {
@@ -37,8 +44,10 @@ public static class Configuration
             StreamReader.Dispose();
             StreamReader = null;
         }
-
+        
+        ClearFile();
         var sw = new StreamWriter(ConfigFile);
+        sw.WriteLine($"* WARNING: Removing This Line Will Regenerate this Config Which will delete all configs that are in here");
         sw.WriteLine($"//Here you can Write new ConfigEntries that will modify Data Once it arrives");
         sw.WriteLine($"//For Example Below here would replace Sending Keyboard Data from 66 to 74 which is 'B' to 'J'");
         sw.WriteLine($"//Sender.Keyboard.66.74");
@@ -49,6 +58,12 @@ public static class Configuration
         sw.WriteLine($"//This will press button VirtualKey 81 on a keyboard when Receiving DPadLeft");
         
         
+    }
+
+    private static void ClearFile(){
+        VerifyConfig();
+        File.Delete(ConfigFile);
+        File.Create(ConfigFile);
     }
 
     public static void VerifyConfig(){
@@ -64,6 +79,7 @@ public static class Configuration
 
 public class ConfigEntry
 {
+    public static List<ConfigEntry> AllConfigLines = new List<ConfigEntry>();
     public DataConfigHandlingType DataConfigHandlingType;
     public InputType InputType;
     public int Key;
