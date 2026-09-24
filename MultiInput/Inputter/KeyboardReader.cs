@@ -25,7 +25,7 @@ public class KeyboardReader
         }
     }
 
-    public void OnKeyStateChange(KeyStateChanged ev, List<Socket?> clients){
+    public void OnKeyStateChange(KeyStateChanged ev, List<Socket> clients){
         DebugLog.DebugMessageThread($"KeyData | Key: {VKey} | State: {ev}\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".",StaticData.Clients.Select(x=>x?.RemoteEndPoint))}");
         if (this.VKey == (int)VirtualKeyCode.F3) {
             if (ev == KeyStateChanged.JustPressed) {
