@@ -1,4 +1,3 @@
-﻿
 using MultiInput.Logging;
 using WindowsInput;
 using WindowsInput.Native;
