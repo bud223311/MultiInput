@@ -25,7 +25,7 @@ public static class ControllerReader
         StaticData.DualSense.BeginPolling(20);
         StaticData.DualSense.OutputState.LeftRumble = 1f;
         StaticData.DualSense.OutputState.RightRumble = 1f;
-        WaitingTimer.WaitForMilliseconds(300);
+        WaitingTimer.WaitForMilliseconds(500);
         StaticData.DualSense.OutputState.LeftRumble = 0f;
         StaticData.DualSense.OutputState.RightRumble = 0f;
         StaticData.ControllerInputType = ControllerInputType.DualSense;
