@@ -9,7 +9,7 @@ namespace MultiInput;
 
 internal static class TcpServer
 {
-    
+    public static readonly Version ProgramVersion = new (0,0,1);
     private static readonly string RunTime = $"{DateTime.Now}";
     public static bool EndProgram;
 

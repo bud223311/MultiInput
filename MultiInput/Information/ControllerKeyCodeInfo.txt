@@ -1,0 +1,15 @@
+﻿Currently only has support for buttons not axis's like triggers and sticks and gyro
+they will be supported at some point i hope
+             
+A
+B
+X
+Y
+LeftShoulder
+RightShoulder
+DPadUp
+DPadDown
+DPadLeft
+DPadRight
+Start
+Back
