@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-using System.Net;
+﻿using System.Net;
 using System.Runtime.InteropServices;
 using MultiInput.Extensions;
 using MultiInput.Inputter;

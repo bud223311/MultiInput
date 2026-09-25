@@ -28,10 +28,7 @@ public partial class MultiInputTcp
                     KeyboardReader.InitializeKeys();
                     break;
                 case InputType.Controller:
-                    if (ControllerReader.TryGetDualShockController()) {
-                        break;
-                    }
-                    ControllerReader.XInput.InitializeButtons();
+                    ControllerReader.TryGetController();
                     break;
             }
         }
@@ -60,7 +57,6 @@ public partial class MultiInputTcp
              */
 
             var disconnectedSockets = StaticData.Clients.Where(client => !client.Connected).ToList();
-            //92.17.121.207
             foreach (var disconnectedSocket in disconnectedSockets) {
                 OnDisconnect(disconnectedSocket);
             }
