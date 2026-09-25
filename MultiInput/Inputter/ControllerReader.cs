@@ -185,11 +185,11 @@ public static class ControllerReader
         public static void ReadAllButtons(){
             foreach (var buttonState in ButtonState.AllButtons) {
                 buttonState.IsPressed = GetButton((uint)TargettedControllerIndex, buttonState.Button);
-                if (buttonState.IsPressed && !buttonState.WasPressedLastFrame ||
-                    !buttonState.IsPressed && buttonState.WasPressedLastFrame)
-                {
+                
+                if (buttonState.IsPressed == !buttonState.WasPressedLastFrame){
                     buttonState.NotifyButtonStateChange();
                 }
+                
                 buttonState.WasPressedLastFrame = buttonState.IsPressed;
             }
         }
