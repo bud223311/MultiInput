@@ -31,7 +31,6 @@ public partial class MultiInputTcp
                     break;
                 case InputType.Controller:
                     ControllerReader.TryGetController();
-                    ControllerReader.XInput.InitializeButtons();
                     break;
             }
         }
