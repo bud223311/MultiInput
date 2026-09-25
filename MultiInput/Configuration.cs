@@ -1,4 +1,4 @@
-﻿using MultiInput.Inputter;
+using MultiInput.Inputter;
 using MultiInput.Logging;
 using MultiInput.Timer;
 
