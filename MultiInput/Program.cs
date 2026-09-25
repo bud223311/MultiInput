@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics.Contracts;
+using System.Net;
 using System.Runtime.InteropServices;
 using MultiInput.Extensions;
 using MultiInput.Inputter;
@@ -24,107 +25,139 @@ internal static class TcpServer
             string consoleStr = Console.ReadLine() ?? string.Empty;
             
             DebugLog.DebugMessageThread($"Console Input: {consoleStr}");
-            
-            if (consoleStr.ToLowerInvariant() is "exit" or "e" or "quit" or "q") {
-                EndProgram = true;
-                continue;
-            }
-            
-            if (consoleStr.ToLowerInvariant() is "accept" or "a" or "acc") {
-                ConsoleLog.WriteConsoleMessage($"Port in which to accept on?",ConsoleColor.Yellow);
-                string port = Console.ReadLine() ?? string.Empty;
-                
-                if (!int.TryParse(port,out int tPort)) {
-                    continue;
-                }
-                
-                DebugLog.DebugMessageThread($"Accepting Connections on Port: {tPort}");
-                MultiInputTcp.MultiInputTcpHost.InitializeHost(tPort);
-                if (StaticData.Host is null) {
-                    ConsoleLog.WriteConsoleMessage($"Failed to Initialize Host: {tPort}", ConsoleColor.Red);
-                    DebugLog.DebugMessageThread($"Failed to Initialize Host: {tPort}");
-                    continue;
-                }
-                ConsoleLog.WriteConsoleMessage($"InputMethod:\n1. Keyboard\n2. Controller");
-                if (!int.TryParse(Console.ReadLine(), out int inputMethod)) {
-                    ConsoleLog.WriteConsoleMessage($"InputMethod TryParse Failed: {consoleStr}", ConsoleColor.Red);
-                    DebugLog.DebugMessageThread($"InputMethod TryParse Failed: {consoleStr}");
-                    continue;
-                }
-                switch (inputMethod) {
-                    case 1:
-                        StaticData.InputType = InputType.Keyboard;
-                        break;
-                    case 2:
-                        StaticData.InputType = InputType.Controller;
-                        break;
-                    default:
-                        ConsoleLog.WriteConsoleMessage($"Invalid InputMethod: {inputMethod}", ConsoleColor.Red);
-                        DebugLog.DebugMessageThread($"Invalid InputMethod: {inputMethod}");
+            switch(consoleStr.ToLowerInvariant())
+            {
+                case "exit":
+                case "e":
+                case "quit":
+                case "q":
+                    {
+                        EndProgram = true;
                         continue;
-                }
-                
-                StaticData.Host.Awake();
-                StaticData.WasDisconnected = false;
-                
-                while (!StaticData.WasDisconnected) {
-                    StaticData.Host.Update();
-                }
-                
-                DebugLog.DebugMessageThread($"Stopped Accepting Connections on Port: {tPort}");
-                StaticData.Host.Close();
-                continue;
+                    }
+                case "accept":
+                case "a":
+                case "acc":
+                    {
+                        StartAcceptConnections();
+                        continue;
+                    }
+                case "":
+                    {
+                        ConsoleLog.WriteConsoleMessage($"No Input Provided", ConsoleColor.Red);
+                        continue;
+                    }
+                default:
+                    {
+                        AttemptConnection(consoleStr);
+                        continue;
+                    }
             }
-
-            if (consoleStr == string.Empty) {
-                ConsoleLog.WriteConsoleMessage($"No Input Provided", ConsoleColor.Red);
-                continue;
-            }
-
-            if (!consoleStr.ValidateIpPort()) {
-                ConsoleLog.WriteConsoleMessage($"Validation Failed: {consoleStr}", ConsoleColor.Red);
-                DebugLog.DebugMessageThread($"Validation Failed: {consoleStr}");
-                continue;
-            }
-
-            if (!IPAddress.TryParse(consoleStr.Split(':')[0], out var address)) {
-                ConsoleLog.WriteConsoleMessage($"IPAddress TryParse Failed: {consoleStr}", ConsoleColor.Red);
-                DebugLog.DebugMessageThread($"IPAddress TryParse Failed: {consoleStr}");
-                continue;
-            }
-
-            if (!int.TryParse(consoleStr.Split(':')[1], out int portresult)) {
-                ConsoleLog.WriteConsoleMessage($"Port TryParse Failed: {consoleStr}", ConsoleColor.Red);
-                DebugLog.DebugMessageThread($"Port TryParse Failed: {consoleStr}");
-                continue;
-            }
-            
-            DebugLog.DebugMessageThread($"Connecting to {address}:{portresult}");
-            MultiInputTcp.MultiInputTcpClient.InitializeClient(address, portresult);
-            
-            if (StaticData.Client is null) {
-                ConsoleLog.WriteConsoleMessage($"Failed to Initialize Client: {consoleStr}", ConsoleColor.Red);
-                DebugLog.DebugMessageThread($"Failed to Initialize Client: {consoleStr}");
-                continue;
-            }
-            
-
-            StaticData.Client.Awake();
-            StaticData.WasDisconnected = false;
-            
-            while (!StaticData.WasDisconnected) {
-                if (StaticData.Client is null){
-                    StaticData.WasDisconnected = true;
-                }
-                StaticData.Client?.Update();
-            }
-            
-            DebugLog.DebugMessageThread($"Disconnected from {address}:{portresult}");
-            StaticData.Client?.Close();
         }
         
         OnCloseProgram(1);
     }
+    private static void AttemptConnection(string input)
+    {
+        if (!TryGetIPPort(input, out IPAddress? address, out int portresult))
+        {
+            ConsoleLog.WriteConsoleMessage($"Failed to Parse IP:Port: {input}", ConsoleColor.Red);
+            DebugLog.DebugMessageThread($"Failed to Parse IP:Port: {input}");
+            return;
+        }
+
+        DebugLog.DebugMessageThread($"Connecting to {address}:{portresult}");
+        MultiInputTcp.MultiInputTcpClient.InitializeClient(address, portresult);
+
+        if (StaticData.Client is null)
+        {
+            ConsoleLog.WriteConsoleMessage($"Failed to Initialize Client: {input}", ConsoleColor.Red);
+            DebugLog.DebugMessageThread($"Failed to Initialize Client: {input}");
+            return;
+        }
+
+
+        StaticData.Client.Awake();
+        StaticData.WasDisconnected = false;
+
+        while (!StaticData.WasDisconnected)
+        {
+            if (StaticData.Client is null)
+            {
+                StaticData.WasDisconnected = true;
+            }
+            StaticData.Client?.Update();
+        }
+
+        DebugLog.DebugMessageThread($"Disconnected from {address}:{portresult}");
+        StaticData.Client?.Close();
+    }
+    private static void StartAcceptConnections()
+    {
+        ConsoleLog.WriteConsoleMessage($"Port in which to accept on?", ConsoleColor.Yellow);
+        string port = Console.ReadLine() ?? string.Empty;
+
+        if (!int.TryParse(port, out int tPort))
+        {
+            ConsoleLog.WriteConsoleMessage($"Invalid value for a port address: {port}", ConsoleColor.Red);
+            return;
+        }
+
+        DebugLog.DebugMessageThread($"Accepting Connections on Port: {tPort}");
+        MultiInputTcp.MultiInputTcpHost.InitializeHost(tPort);
+        if (StaticData.Host is null)
+        {
+            ConsoleLog.WriteConsoleMessage($"Failed to Initialize Host: {tPort}", ConsoleColor.Red);
+            DebugLog.DebugMessageThread($"Failed to Initialize Host: {tPort}");
+            return;
+        }
+        ConsoleLog.WriteConsoleMessage($"InputMethod:\n0. Keyboard\n1. Controller");
+        if (!InputType.TryParse(Console.ReadLine(), out InputType inputMethod))
+        {
+            ConsoleLog.WriteConsoleMessage($"InputMethod TryParse Failed", ConsoleColor.Red);
+            DebugLog.DebugMessageThread($"InputMethod TryParse Failed");
+            return;
+        }
+        StaticData.InputType = inputMethod;
+
+        StaticData.Host.Awake();
+        StaticData.WasDisconnected = false;
+
+        while (!StaticData.WasDisconnected)
+        {
+            StaticData.Host.Update();
+        }
+
+        DebugLog.DebugMessageThread($"Stopped Accepting Connections on Port: {tPort}");
+        StaticData.Host.Close();
+    }
+    private static bool TryGetIPPort(string input, out IPAddress? address, out int portresult)
+    {
+        address = default;
+        portresult = -1;
+
+        if (!input.ValidateIpPort())
+        {
+            ConsoleLog.WriteConsoleMessage($"Validation Failed: {input}", ConsoleColor.Red);
+            DebugLog.DebugMessageThread($"Validation Failed: {input}");
+            return false;
+        }
+        if (!IPAddress.TryParse(input.Split(':')[0], out address))
+        {
+            ConsoleLog.WriteConsoleMessage($"IPAddress TryParse Failed: {input}", ConsoleColor.Red);
+            DebugLog.DebugMessageThread($"IPAddress TryParse Failed: {input}");
+            return false;
+        }
+        if (!int.TryParse(input.Split(':')[1], out portresult))
+        {
+            ConsoleLog.WriteConsoleMessage($"Port TryParse Failed: {input}", ConsoleColor.Red);
+            DebugLog.DebugMessageThread($"Port TryParse Failed: {input}");
+            return false;
+        }
+        DebugLog.DebugMessageThread($"Parsed IP: {address}, Port: {portresult}");
+        return true;    
+    }
+
     private static bool OnCloseProgram(int eventType) {
         ConsoleLog.WriteConsoleMessage($"Closing Program...", ConsoleColor.Yellow);
         KeyboardInput.ReleaseAll();
