@@ -16,16 +16,14 @@ public static class StaticData
     internal static ControllerInputType ControllerInputType;
     internal static DualSense? DualSense
     {
-        get
-        {
-            return DualSense;
-        }
+        get;
         set
         {
             if (value is null)
             {
                 ControllerInputType = ControllerInputType.XInput;
                 XInput.InitializeButtons();
+                field = null;
                 return;
             }
             DualSense = value;
@@ -38,6 +36,7 @@ public static class StaticData
             DualSense.OutputState.LeftRumble = 0f;
             DualSense.OutputState.RightRumble = 0f;
             ControllerInputType = ControllerInputType.DualSense;
+            field = value;
         }
     }
     public static InputType InputType;
