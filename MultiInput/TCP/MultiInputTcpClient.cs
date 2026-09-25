@@ -20,6 +20,7 @@ public partial class MultiInputTcp
             StaticData.Client = new MultiInputTcpClient(new TcpClient(),address,portresult);
         }
         public void Awake(){
+            Configuration.ReadConfig();
             _lastconnectionstate = false;
             ConsoleLog.WriteConsoleMessage($"Connecting...", ConsoleColor.Yellow);
             try {

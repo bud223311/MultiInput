@@ -22,6 +22,7 @@ public partial class MultiInputTcp
         }
 
         public void Awake(){
+            Configuration.ReadConfig();
             ConsoleLog.WriteConsoleMessage($"Waiting For Connections...", ConsoleColor.Cyan);
             Listener.Start();
             switch (StaticData.InputType) {
