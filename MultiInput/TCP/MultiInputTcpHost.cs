@@ -30,9 +30,7 @@ public partial class MultiInputTcp
                     KeyboardReader.InitializeKeys();
                     break;
                 case InputType.Controller:
-                    if (ControllerReader.TryGetDualShockController()) {
-                        break;
-                    }
+                    ControllerReader.TryGetController();
                     ControllerReader.XInput.InitializeButtons();
                     break;
             }
