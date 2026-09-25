@@ -14,8 +14,7 @@ public class KeyboardInput
         DebugLog.WriteDebugMessage($"Received: {data}");
         if (count > 3) {
             
-            if (!HandlerUtils.TryParseData(data, out Data? validData))
-            {
+            if (!HandlerUtils.TryParseData(data, out Data? validData)){
                 return;
             }
             Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| {validData.InputType} INPUT | KEY:{validData.Key} STATE:{validData.State}");

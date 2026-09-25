@@ -43,7 +43,7 @@ public static class ControllerReader
             {
                 return;
             }
-            byte[] data = $"{inputType}.{button}.{held}".ToBytes();
+            byte[] data = $"{(int)inputType}.{button}.{(held ? 1 : 0)}".ToBytes();
 
             MultiInputTcp.MultiInputTcpHost.TrySendToAll(data);
         }
