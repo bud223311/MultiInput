@@ -1,5 +1,7 @@
-﻿using System.Net.Sockets;
-using MultiInput.Logging;
+﻿using MultiInput.Logging;
+using System.Net.Sockets;
+using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MultiInput.Extensions;
 
@@ -12,6 +14,11 @@ public static class StringExtensions
         }
         string[] checkip = checkport[0].Split('.');
         return checkip.Length is > 2 and < 6;
+    }
+
+    public static byte[] ToBytes(this string input)
+    {
+        return Encoding.UTF8.GetBytes(input);
     }
 }
 public static class ListExtensions

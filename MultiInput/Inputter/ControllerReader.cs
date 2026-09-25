@@ -1,10 +1,8 @@
 ﻿using System.Runtime.InteropServices;
-using System.Text;
 using DualSenseAPI;
-using DualSenseAPI.State;
+using MultiInput.Extensions;
 using MultiInput.Logging;
 using MultiInput.TCP;
-using MultiInput.Timer;
 
 namespace MultiInput.Inputter;
 
@@ -12,44 +10,9 @@ public static class ControllerReader
 {
     public static int TargettedControllerIndex = -1;
 
-    public static bool TryGetDualShockController(){
+    public static void TryGetController(){
         DualSense? dualSense = DualSense.EnumerateControllers().FirstOrDefault();
-        if (dualSense is null) {
-            StaticData.ControllerInputType = ControllerInputType.XInput;
-            return false;
-        }
-
         StaticData.DualSense = dualSense;
-        StaticData.DualSense.Acquire();
-        StaticData.DualSense.OnButtonStateChanged += OnDualShockControllerStateChange;
-        StaticData.DualSense.BeginPolling(20);
-        StaticData.DualSense.OutputState.LeftRumble = 1f;
-        StaticData.DualSense.OutputState.RightRumble = 1f;
-        WaitingTimer.WaitForMilliseconds(500);
-        StaticData.DualSense.OutputState.LeftRumble = 0f;
-        StaticData.DualSense.OutputState.RightRumble = 0f;
-        StaticData.ControllerInputType = ControllerInputType.DualSense;
-        return true;
-    }
-
-    private static void OnDualShockControllerStateChange(DualSense sender, DualSenseInputStateButtonDelta changes){
-        
-        /*if (changes.SquareButton == ButtonDeltaState.Pressed) {
-            MultiInputTcp.MultiInputTcpHost.TrySendToAll(Encoding.UTF8.GetBytes($"1.X.1"));
-        }*/
-        
-        switch (changes.DPadLeftButton) {
-            case ButtonDeltaState.Pressed:
-                MultiInputTcp.MultiInputTcpHost.TrySendToAll(Encoding.UTF8.GetBytes($"1.DPadLeft.1"));
-                break;
-            case ButtonDeltaState.Released:
-                MultiInputTcp.MultiInputTcpHost.TrySendToAll(Encoding.UTF8.GetBytes($"1.DPadLeft.0"));
-                break;
-        }
-
-        // if (changes.SquareButton == ButtonDeltaState.Released) {
-        //     MultiInputTcp.MultiInputTcpHost.TrySendToAll(Encoding.UTF8.GetBytes($"1.X.0"));
-        // }
     }
     public class ButtonState
     {
@@ -64,37 +27,25 @@ public static class ControllerReader
             AllButtons.Add(this);
         }
 
-        public void PressButton(){
-            // if (StaticData.Clients.Count is 0) {
-            //     return;
-            // }
-            DebugLog.DebugMessageThread($"KeyData | Key: {Button} | State: On\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".",StaticData.Clients.Select(x=>x.RemoteEndPoint))}");
-
-            if (!StaticData.ToggleInput) {
-                return;
-            }
-            //First Number identifies it as a controller input, last number is on state
-            string data = $"1.{Button}.1";
-            byte[] span = Encoding.UTF8.GetBytes(data);
-
-            MultiInputTcp.MultiInputTcpHost.TrySendToAll(span);
-
-
+        public void NotifyButtonStateChange()
+        {
+            SendButtonPacket(InputType.Controller, Button, held: IsPressed);
         }
-        public void ReleaseButton(){
+
+        public static void SendButtonPacket(InputType inputType, XInputButton button, bool held)
+        {
             // if (StaticData.Clients.Count is 0) {
             //     return;
             // }
-            DebugLog.DebugMessageThread($"KeyData | Key: {Button} | State: Off\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".",StaticData.Clients.Select(x=>x.RemoteEndPoint))}");
+            DebugLog.DebugMessageThread($"KeyData | Key: {button} | State: {(held ? "On" : "Off")}\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".", StaticData.Clients.Select(x => x.RemoteEndPoint))}");
 
-            if (!StaticData.ToggleInput) {
+            if (!StaticData.ToggleInput)
+            {
                 return;
             }
-            //First Number identifies it as a controller input, last number is on state
-            string data = $"1.{Button}.0";
-            byte[] span = Encoding.UTF8.GetBytes(data);
+            byte[] data = $"{inputType}.{button}.{held}".ToBytes();
 
-            MultiInputTcp.MultiInputTcpHost.TrySendToAll(span);
+            MultiInputTcp.MultiInputTcpHost.TrySendToAll(data);
         }
     }
 	
@@ -234,11 +185,10 @@ public static class ControllerReader
         public static void ReadAllButtons(){
             foreach (var buttonState in ButtonState.AllButtons) {
                 buttonState.IsPressed = GetButton((uint)TargettedControllerIndex, buttonState.Button);
-                if (buttonState is{ IsPressed: true, WasPressedLastFrame: false }) {
-                    buttonState.PressButton();
-                }
-                if (buttonState is{ IsPressed: false, WasPressedLastFrame: true }) {
-                    buttonState.ReleaseButton();
+                if (buttonState.IsPressed && !buttonState.WasPressedLastFrame ||
+                    !buttonState.IsPressed && buttonState.WasPressedLastFrame)
+                {
+                    buttonState.NotifyButtonStateChange();
                 }
                 buttonState.WasPressedLastFrame = buttonState.IsPressed;
             }

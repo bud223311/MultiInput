@@ -37,6 +37,12 @@ public static class HandlerUtils
         return new Data((InputType)inputType,fKey,fState);
     }
 
+    public static bool TryParseData(string data, out Data? parsedData)
+    {
+        parsedData = ValidateData(data);
+        return parsedData is not null;
+    }
+
     public static void HandleController(Data data){
         switch (data.Key) {
             /*case $"A":

@@ -14,11 +14,13 @@ public class KeyboardInput
         DebugLog.WriteDebugMessage($"Received: {data}");
         if (count > 3) {
             
-            Data? validData = HandlerUtils.ValidateData(data);
-            if (validData is null) {
+            if (!HandlerUtils.TryParseData(data, out Data? validData))
+            {
                 return;
             }
-            
+            Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| {validData.InputType} INPUT | KEY:{validData.Key} STATE:{validData.State}");
+            DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| {validData.InputType} INPUT | KEY:{validData.Key} STATE:{validData.State}");
+
             switch (validData.InputType) {
                 case InputType.Keyboard:
                 {
@@ -27,15 +29,11 @@ public class KeyboardInput
                         DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse Key. DATA:{data}");
                         return;
                     }
-                
-                    Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{validData.Key} STATE:{validData.State}");
-                    DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| KEY:{validData.Key} STATE:{validData.State}");
+               
                     SendKeyStroke(fKeyInt, validData.State);
                     return;
                 }
                 case InputType.Controller:
-                    Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| CONTROLLER INPUT | KEY:{validData.Key} STATE:{validData.State}");
-                    DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| CONTROLLER INPUT | KEY:{validData.Key} STATE:{validData.State}");
                     HandlerUtils.HandleController(validData);
                     break;
             }
@@ -45,8 +43,6 @@ public class KeyboardInput
     public static List<int> GetUpVirtualKeys(){
         return _pressedKeys;
     }
-    
-    
     
     public static void SendKeyStroke(int key,int state){
         if (state == 1) {

@@ -55,64 +55,61 @@ public class KeyboardReader
         return Keys.FirstOrDefault(x=>x.Key == key).Value;
     }
     public static void InitializeKeys(){
-        new KeyboardReader((int)VirtualKeyCode.VK_A).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_B).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_C).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_D).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_E).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_F).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_G).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_H).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_I).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_J).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_K).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_L).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_M).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_N).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_O).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_P).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_Q).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_R).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_S).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_T).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_U).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_V).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_W).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_X).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_Y).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_Z).Register();
+        new KeyboardReader((int)VirtualKeyCode.VK_A);
+        new KeyboardReader((int)VirtualKeyCode.VK_B);
+        new KeyboardReader((int)VirtualKeyCode.VK_C);
+        new KeyboardReader((int)VirtualKeyCode.VK_D);
+        new KeyboardReader((int)VirtualKeyCode.VK_E);
+        new KeyboardReader((int)VirtualKeyCode.VK_F);
+        new KeyboardReader((int)VirtualKeyCode.VK_G);
+        new KeyboardReader((int)VirtualKeyCode.VK_H);
+        new KeyboardReader((int)VirtualKeyCode.VK_I);
+        new KeyboardReader((int)VirtualKeyCode.VK_J);
+        new KeyboardReader((int)VirtualKeyCode.VK_K);
+        new KeyboardReader((int)VirtualKeyCode.VK_L);
+        new KeyboardReader((int)VirtualKeyCode.VK_M);
+        new KeyboardReader((int)VirtualKeyCode.VK_N);
+        new KeyboardReader((int)VirtualKeyCode.VK_O);
+        new KeyboardReader((int)VirtualKeyCode.VK_P);
+        new KeyboardReader((int)VirtualKeyCode.VK_Q);
+        new KeyboardReader((int)VirtualKeyCode.VK_R);
+        new KeyboardReader((int)VirtualKeyCode.VK_S);
+        new KeyboardReader((int)VirtualKeyCode.VK_T);
+        new KeyboardReader((int)VirtualKeyCode.VK_U);
+        new KeyboardReader((int)VirtualKeyCode.VK_V);
+        new KeyboardReader((int)VirtualKeyCode.VK_W);
+        new KeyboardReader((int)VirtualKeyCode.VK_X);
+        new KeyboardReader((int)VirtualKeyCode.VK_Y);
+        new KeyboardReader((int)VirtualKeyCode.VK_Z);
         
-        new KeyboardReader((int)VirtualKeyCode.VK_0).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_1).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_2).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_3).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_4).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_5).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_6).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_7).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_8).Register();
-        new KeyboardReader((int)VirtualKeyCode.VK_9).Register();
+        new KeyboardReader((int)VirtualKeyCode.VK_0);
+        new KeyboardReader((int)VirtualKeyCode.VK_1);
+        new KeyboardReader((int)VirtualKeyCode.VK_2);
+        new KeyboardReader((int)VirtualKeyCode.VK_3);
+        new KeyboardReader((int)VirtualKeyCode.VK_4);
+        new KeyboardReader((int)VirtualKeyCode.VK_5);
+        new KeyboardReader((int)VirtualKeyCode.VK_6);
+        new KeyboardReader((int)VirtualKeyCode.VK_7);
+        new KeyboardReader((int)VirtualKeyCode.VK_8);
+        new KeyboardReader((int)VirtualKeyCode.VK_9);
         
-        new KeyboardReader((int)VirtualKeyCode.SPACE).Register();
-        new KeyboardReader((int)VirtualKeyCode.MENU).Register();
-        new KeyboardReader((int)VirtualKeyCode.ESCAPE).Register();
-        new KeyboardReader((int)VirtualKeyCode.BACK).Register();
-        new KeyboardReader((int)VirtualKeyCode.RETURN).Register();
-        new KeyboardReader((int)VirtualKeyCode.LEFT).Register();
-        new KeyboardReader((int)VirtualKeyCode.RIGHT).Register();
-        new KeyboardReader((int)VirtualKeyCode.UP).Register();
-        new KeyboardReader((int)VirtualKeyCode.DOWN).Register();
+        new KeyboardReader((int)VirtualKeyCode.SPACE);
+        new KeyboardReader((int)VirtualKeyCode.MENU);
+        new KeyboardReader((int)VirtualKeyCode.ESCAPE);
+        new KeyboardReader((int)VirtualKeyCode.BACK);
+        new KeyboardReader((int)VirtualKeyCode.RETURN);
+        new KeyboardReader((int)VirtualKeyCode.LEFT);
+        new KeyboardReader((int)VirtualKeyCode.RIGHT);
+        new KeyboardReader((int)VirtualKeyCode.UP);
+        new KeyboardReader((int)VirtualKeyCode.DOWN);
 
         //TOGGLE
-        new KeyboardReader((int)VirtualKeyCode.F3).Register();
+        new KeyboardReader((int)VirtualKeyCode.F3);
     }
 
     public KeyboardReader(int vKey){
         VKey = vKey;
-    }
-
-    public void Register(){
-        Keys.Add(this.VKey,this);
+        Keys.Add(vKey, this);
     }
     [DllImport("user32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
     public static extern short GetKeyState(int nVirtKey);
