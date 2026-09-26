@@ -26,17 +26,16 @@ public static class StaticData
                 field = null;
                 return;
             }
-            DualSense = value;
-            DualSense.Acquire();
-            DualSense.OnButtonStateChanged += OnDualShockControllerStateChange;
-            DualSense.BeginPolling(20);
-            DualSense.OutputState.LeftRumble = 1f;
-            DualSense.OutputState.RightRumble = 1f;
-            WaitingTimer.WaitForMilliseconds(500);
-            DualSense.OutputState.LeftRumble = 0f;
-            DualSense.OutputState.RightRumble = 0f;
-            ControllerInputType = ControllerInputType.DualSense;
             field = value;
+            field.Acquire();
+            field.OnButtonStateChanged += OnDualShockControllerStateChange;
+            field.BeginPolling(20);
+            field.OutputState.LeftRumble = 1f;
+            field.OutputState.RightRumble = 1f;
+            WaitingTimer.WaitForMilliseconds(500);
+            field.OutputState.LeftRumble = 0f;
+            field.OutputState.RightRumble = 0f;
+            ControllerInputType = ControllerInputType.DualSense;
         }
     }
     public static InputType InputType;
