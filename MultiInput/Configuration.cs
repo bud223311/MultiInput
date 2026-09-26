@@ -1,43 +1,40 @@
 using MultiInput.Inputter;
 using MultiInput.Logging;
-using MultiInput.Timer;
 
 namespace MultiInput;
 
-public static class Configuration
+public class Configuration
 {
+    public List<ConfigEntry> AllConfigEntries = new List<ConfigEntry>();
     public static readonly string ConfigLocation = $@"{Environment.CurrentDirectory}\Config";
     public static readonly string ConfigFile = $@"{ConfigLocation}\MultiInputConfig.txt";
     //TODO Test if Ts even works cause I'm too trtirted Zzz
+
+    public Configuration()
+    {
+        ReadConfig();
+    }
     
-    public static bool ReadConfig(){
+    public bool ReadConfig(){
         ConsoleLog.WriteConsoleMessage($"Reading ConfigFile");
         if (!VerifyExists()) {
             WriteFreshConfig();
         }
         StreamReader sr = new StreamReader(ConfigFile);
         try {
-            string? reinitializationLine = sr.ReadLine();
-            if (reinitializationLine is null || !reinitializationLine.StartsWith('*')) {
-                sr.Dispose();
-                sr.Close();
-                WriteFreshConfig();
-                return false;
-            }
-
             while (!sr.EndOfStream) {
                 string? line = sr.ReadLine();
                 if (line is null) {
                     continue;
                 }
 
-                if (line.StartsWith($"//")) {
+                if (line.StartsWith(COMMENT_OPERATOR)) {
                     continue;
                 }
 
-                new ConfigEntry(line.Split('.'));
-
-
+                string[] arguments = line.Split('.');
+                ConfigEntry entry = new ConfigEntry(arguments);
+                AllConfigEntries.Add(entry);
             }
         }
         catch (OutOfMemoryException e) {
@@ -46,48 +43,46 @@ public static class Configuration
 
         return true;
     }
+    const string COMMENT_OPERATOR = "//";
+    const string CONFIG_DEFAULT_CONTENT = $"{COMMENT_OPERATOR} Here you can write new ConfigEntries that will modify data once it arrives\n" +
+                                        $"{COMMENT_OPERATOR} For example below here would replace sending keyboard data from 66 to 74 which is 'B' to 'J'\n" +
+                                        $"{COMMENT_OPERATOR} Sender.Keyboard.66.74\n" +
+                                        $"{COMMENT_OPERATOR} Which means when you press 'B' it will send info to the other clients that you pressed 'J'\n" +
+                                        $"{COMMENT_OPERATOR} Here is the main use of the program when you receive data. For example: DPadLeft from a controller or a number from a keyboard\n" +
+                                        $"{COMMENT_OPERATOR} You can make the data you receive send a keystroke\n" +
+                                        $"{COMMENT_OPERATOR} Receiver.Controller.DPadLeft.81\n" +
+                                        $"{COMMENT_OPERATOR} This will press button VirtualKey 81 on a keyboard when receiving DPadLeft\n" +
+                                        $"{COMMENT_OPERATOR} You can write your configurations below this one without '{COMMENT_OPERATOR}'";
 
-    public static void WriteFreshConfig(){
+    public void WriteFreshConfig(){
         ConsoleLog.WriteConsoleMessage($"Rewriting Default Config");
         ClearFile();
         var sw = new StreamWriter(ConfigFile);
-        sw.WriteLine($"* WARNING: Removing This Line Will Regenerate this Config Which will delete all configs that are in here");
-        sw.WriteLine($"//Here you can Write new ConfigEntries that will modify Data Once it arrives");
-        sw.WriteLine($"//For Example Below here would replace Sending Keyboard Data from 66 to 74 which is 'B' to 'J'");
-        sw.WriteLine($"//Sender.Keyboard.66.74");
-        sw.WriteLine($"//Which Means when you press 'B' it will send info to the other clients that you pressed 'J'");
-        sw.WriteLine($"//Here is the main use of the program when you Receive Data. For Example: DPadLeft from a controller or a number from a keyboard");
-        sw.WriteLine($"//You can make the data you receive send a keystroke");
-        sw.WriteLine($"//Receiver.Controller.DPadLeft.81");
-        sw.WriteLine($"//This will press button VirtualKey 81 on a keyboard when Receiving DPadLeft");
-        sw.WriteLine($"\n\n//Write new lines above this one");
+        sw.WriteLine(CONFIG_DEFAULT_CONTENT);
         sw.Close();
     }
 
-    private static void ClearFile(){
+    private void ClearFile(){
         VerifyConfig();
         File.Delete(ConfigFile);
         File.Create(ConfigFile).Close();
     }
 
-    public static void VerifyConfig(){
-        if (!Directory.Exists(ConfigLocation)) {
-            Directory.CreateDirectory(ConfigLocation);
-        }
+    public void VerifyConfig(){
+        Directory.CreateDirectory(ConfigLocation);
 
         if (!File.Exists(ConfigFile)) {
             File.Create(ConfigFile).Close();
         }
     }
 
-    public static bool VerifyExists(){
+    public bool VerifyExists(){
         return Directory.Exists(ConfigLocation) && File.Exists(ConfigFile);
     }
 }
 
 public class ConfigEntry
 {
-    public static List<ConfigEntry> AllConfigEntries = new List<ConfigEntry>();
     public DataConfigHandlingType DataConfigHandlingType;
     public InputType InputType;
     public int? ReplacingKey;
@@ -146,7 +141,6 @@ public class ConfigEntry
 
         ReplacedKey = replacedKey;
         ConsoleLog.WriteConsoleMessage($"Accepted",ConsoleColor.Green);
-        AllConfigEntries.Add(this);
     }
 }
 
