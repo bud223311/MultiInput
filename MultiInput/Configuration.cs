@@ -57,7 +57,7 @@ public class Configuration
     public void WriteFreshConfig(){
         ConsoleLog.WriteConsoleMessage($"Rewriting Default Config");
         ClearFile();
-        var sw = new StreamWriter(ConfigFile);
+        StreamWriter sw = new StreamWriter(ConfigFile);
         sw.WriteLine(CONFIG_DEFAULT_CONTENT);
         sw.Close();
     }
