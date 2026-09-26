@@ -5,7 +5,9 @@ namespace MultiInput;
 
 public class Configuration
 {
-    public List<ConfigEntry> AllConfigEntries = new List<ConfigEntry>();
+    public List<ConfigEntry> ClientConfigs = new List<ConfigEntry>();
+    public List<ConfigEntry> HostConfigs = new List<ConfigEntry>();
+
     public static readonly string ConfigLocation = $@"{Environment.CurrentDirectory}\Config";
     public static readonly string ConfigFile = $@"{ConfigLocation}\MultiInputConfig.txt";
     //TODO Test if Ts even works cause I'm too trtirted Zzz
@@ -34,7 +36,14 @@ public class Configuration
 
                 string[] arguments = line.Split('.');
                 ConfigEntry entry = new ConfigEntry(arguments);
-                AllConfigEntries.Add(entry);
+                switch (entry.DataConfigHandlingType) {
+                    case DataConfigHandlingType.Receiver:
+                        ClientConfigs.Add(entry);
+                        break;
+                    case DataConfigHandlingType.Sender:
+                        HostConfigs.Add(entry);
+                        break;
+                }
             }
         }
         catch (OutOfMemoryException e) {
@@ -138,6 +147,8 @@ public class ConfigEntry
             DebugLog.WriteDebugMessage($"Failed To Parse |{configLine[2]}| as valid InputType");
             return;
         }
+
+        
 
         ReplacedKey = replacedKey;
         ConsoleLog.WriteConsoleMessage($"Accepted",ConsoleColor.Green);
