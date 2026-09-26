@@ -6,7 +6,6 @@ using MultiInput.Extensions;
 using MultiInput.Inputter;
 using MultiInput.Logging;
 using MultiInput.Poller;
-using MultiInput.Timer;
 
 namespace MultiInput.TCP;
 
@@ -14,6 +13,7 @@ public partial class MultiInputTcp
 {
     public class MultiInputTcpHost(TcpListener listener)
     {
+        private Configuration config;
         public TcpListener Listener = listener;
         private bool _restrictLogSpamming;
         private bool _hasvibratedController;
@@ -22,7 +22,7 @@ public partial class MultiInputTcp
         }
 
         public void Awake(){
-            Configuration.ReadConfig();
+            config = new Configuration();
             ConsoleLog.WriteConsoleMessage($"Waiting For Connections...", ConsoleColor.Cyan);
             Listener.Start();
             switch (StaticData.InputType) {
