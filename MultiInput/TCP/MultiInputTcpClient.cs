@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using MultiInput.Configuration;
 using MultiInput.Inputter;
 using MultiInput.Logging;
 
@@ -10,7 +11,7 @@ public partial class MultiInputTcp
 {
     public class MultiInputTcpClient(TcpClient client,IPAddress connectionTo,int port)
     {
-        private Configuration config;
+        private ConfigurationFile config;
         public TcpClient Client = client;
         public IPAddress ConnectionGoesTo = connectionTo;
         public int Port = port;
@@ -21,7 +22,7 @@ public partial class MultiInputTcp
             StaticData.Client = new MultiInputTcpClient(new TcpClient(),address,portresult);
         }
         public void Awake(){
-            config = new Configuration();
+            config = new ConfigurationFile();
             _lastconnectionstate = false;
             ConsoleLog.WriteConsoleMessage($"Connecting...", ConsoleColor.Yellow);
             try {
