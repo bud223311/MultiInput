@@ -39,10 +39,10 @@ public class ConfigurationFile
         ConfigurationEntry entry = new ConfigurationEntry(arguments);
         switch (entry.DataConfigHandlingType)
         {
-            case DataConfigHandlingType.Receiver:
+            case DataConfigurationHandlingType.Receiver:
                 ClientConfigs.Add(entry);
                 break;
-            case DataConfigHandlingType.Sender:
+            case DataConfigurationHandlingType.Sender:
                 HostConfigs.Add(entry);
                 break;
         }

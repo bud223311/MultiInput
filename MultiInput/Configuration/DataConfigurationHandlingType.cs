@@ -1,6 +1,6 @@
 ﻿namespace MultiInput.Configuration
 {
-    public enum DataConfigHandlingType
+    public enum DataConfigurationHandlingType
     {
         Sender,
         Receiver
