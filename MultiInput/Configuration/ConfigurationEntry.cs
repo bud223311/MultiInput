@@ -1,5 +1,4 @@
-﻿using MultiInput.Inputter;
-using MultiInput.Logging;
+﻿using MultiInput.Logging;
 using static MultiInput.Inputter.ControllerReader;
 
 namespace MultiInput.Configuration
