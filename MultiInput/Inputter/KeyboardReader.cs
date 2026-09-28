@@ -1,115 +1,91 @@
 ﻿using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
 using MultiInput.Enums.Constants;
-using MultiInput.Logging;
-using MultiInput.TCP;
 using WindowsInput.Native;
 
 namespace MultiInput.Inputter;
 
-public class KeyboardReader
+public class KeyboardReader : IInputReader
 {
-    public static Dictionary<int, KeyboardReader> Keys = new Dictionary<int, KeyboardReader>();
+    public Dictionary<int, KeyState> Keys = new Dictionary<int, KeyState>();
     public int VKey;
     public bool IsDown;
 
-    public static void UpdateKeys(List<Socket> clients){
+    public KeyboardReader()
+    {
+        InitializeKeys();
+    }
+
+    public void UpdateBindings(List<Socket> connections){
         foreach (var key in Keys.Values) {
             
             bool newState = IsKeyDown(key.VKey);
             if (key.IsDown != newState) {
                 
-                key.OnKeyStateChange(newState ? KeyStateChanged.JustPressed : KeyStateChanged.JustReleased,clients);
+                key.OnKeyStateChange(newState ? KeyStateChanged.JustPressed : KeyStateChanged.JustReleased, connections);
             }
             key.IsDown = newState;
         }
     }
 
-    public void OnKeyStateChange(KeyStateChanged ev, List<Socket> clients){
-        DebugLog.DebugMessageThread($"KeyData | Key: {VKey} | State: {ev}\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".",StaticData.Clients.Select(x=>x.RemoteEndPoint))}");
-        if (this.VKey == (int)VirtualKeyCode.F3) {
-            if (ev == KeyStateChanged.JustPressed) {
-                StaticData.ToggleInput = !StaticData.ToggleInput;
-                Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| TOGGLE INPUT: {StaticData.ToggleInput}");
-            }
-            return;
-        }
-        if (StaticData.Clients.Count is 0) {
-            return;
-        }
-        if (!StaticData.ToggleInput) {
-            return;
-        }
-        
-        string data = ev == KeyStateChanged.JustPressed ? $"{VKey}.1" : $"{VKey}.0";
-
-        var span = Encoding.UTF8.GetBytes($"0.{data}");
-
-        Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
-        DebugLog.DebugMessageThread($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");
-        MultiInputTcp.MultiInputTcpHost.TrySendToAll(span);
-    }
-
-    public static KeyboardReader? GetKeyByVKey(int key){
+    public KeyState? GetKeyByVKey(int key){
         return Keys.FirstOrDefault(x=>x.Key == key).Value;
     }
-    public static void InitializeKeys(){
-        new KeyboardReader((int)VirtualKeyCode.VK_A);
-        new KeyboardReader((int)VirtualKeyCode.VK_B);
-        new KeyboardReader((int)VirtualKeyCode.VK_C);
-        new KeyboardReader((int)VirtualKeyCode.VK_D);
-        new KeyboardReader((int)VirtualKeyCode.VK_E);
-        new KeyboardReader((int)VirtualKeyCode.VK_F);
-        new KeyboardReader((int)VirtualKeyCode.VK_G);
-        new KeyboardReader((int)VirtualKeyCode.VK_H);
-        new KeyboardReader((int)VirtualKeyCode.VK_I);
-        new KeyboardReader((int)VirtualKeyCode.VK_J);
-        new KeyboardReader((int)VirtualKeyCode.VK_K);
-        new KeyboardReader((int)VirtualKeyCode.VK_L);
-        new KeyboardReader((int)VirtualKeyCode.VK_M);
-        new KeyboardReader((int)VirtualKeyCode.VK_N);
-        new KeyboardReader((int)VirtualKeyCode.VK_O);
-        new KeyboardReader((int)VirtualKeyCode.VK_P);
-        new KeyboardReader((int)VirtualKeyCode.VK_Q);
-        new KeyboardReader((int)VirtualKeyCode.VK_R);
-        new KeyboardReader((int)VirtualKeyCode.VK_S);
-        new KeyboardReader((int)VirtualKeyCode.VK_T);
-        new KeyboardReader((int)VirtualKeyCode.VK_U);
-        new KeyboardReader((int)VirtualKeyCode.VK_V);
-        new KeyboardReader((int)VirtualKeyCode.VK_W);
-        new KeyboardReader((int)VirtualKeyCode.VK_X);
-        new KeyboardReader((int)VirtualKeyCode.VK_Y);
-        new KeyboardReader((int)VirtualKeyCode.VK_Z);
-        
-        new KeyboardReader((int)VirtualKeyCode.VK_0);
-        new KeyboardReader((int)VirtualKeyCode.VK_1);
-        new KeyboardReader((int)VirtualKeyCode.VK_2);
-        new KeyboardReader((int)VirtualKeyCode.VK_3);
-        new KeyboardReader((int)VirtualKeyCode.VK_4);
-        new KeyboardReader((int)VirtualKeyCode.VK_5);
-        new KeyboardReader((int)VirtualKeyCode.VK_6);
-        new KeyboardReader((int)VirtualKeyCode.VK_7);
-        new KeyboardReader((int)VirtualKeyCode.VK_8);
-        new KeyboardReader((int)VirtualKeyCode.VK_9);
-        
-        new KeyboardReader((int)VirtualKeyCode.SPACE);
-        new KeyboardReader((int)VirtualKeyCode.MENU);
-        new KeyboardReader((int)VirtualKeyCode.ESCAPE);
-        new KeyboardReader((int)VirtualKeyCode.BACK);
-        new KeyboardReader((int)VirtualKeyCode.RETURN);
-        new KeyboardReader((int)VirtualKeyCode.LEFT);
-        new KeyboardReader((int)VirtualKeyCode.RIGHT);
-        new KeyboardReader((int)VirtualKeyCode.UP);
-        new KeyboardReader((int)VirtualKeyCode.DOWN);
+    public void InitializeKeys(){
+        VirtualKeyCode[] codes =
+            [
+            VirtualKeyCode.VK_A,
+            VirtualKeyCode.VK_B,
+            VirtualKeyCode.VK_C,
+            VirtualKeyCode.VK_D,
+            VirtualKeyCode.VK_E,
+            VirtualKeyCode.VK_F,
+            VirtualKeyCode.VK_G,
+            VirtualKeyCode.VK_H,
+            VirtualKeyCode.VK_I,
+            VirtualKeyCode.VK_J,
+            VirtualKeyCode.VK_K,
+            VirtualKeyCode.VK_L,
+            VirtualKeyCode.VK_M,
+            VirtualKeyCode.VK_N,
+            VirtualKeyCode.VK_O,
+            VirtualKeyCode.VK_P,
+            VirtualKeyCode.VK_Q,
+            VirtualKeyCode.VK_R,
+            VirtualKeyCode.VK_S,
+            VirtualKeyCode.VK_T,
+            VirtualKeyCode.VK_U,
+            VirtualKeyCode.VK_V,
+            VirtualKeyCode.VK_W,
+            VirtualKeyCode.VK_X,
+            VirtualKeyCode.VK_Y,
+            VirtualKeyCode.VK_Z,
 
-        //TOGGLE
-        new KeyboardReader((int)VirtualKeyCode.F3);
-    }
+            VirtualKeyCode.VK_0,
+            VirtualKeyCode.VK_1,
+            VirtualKeyCode.VK_2,
+            VirtualKeyCode.VK_3,
+            VirtualKeyCode.VK_4,
+            VirtualKeyCode.VK_5,
+            VirtualKeyCode.VK_6,
+            VirtualKeyCode.VK_7,
+            VirtualKeyCode.VK_8,
+            VirtualKeyCode.VK_9,
 
-    public KeyboardReader(int vKey){
-        VKey = vKey;
-        Keys.Add(vKey, this);
+            VirtualKeyCode.SPACE,
+            VirtualKeyCode.MENU,
+            VirtualKeyCode.ESCAPE,
+            VirtualKeyCode.BACK,
+            VirtualKeyCode.RETURN,
+            VirtualKeyCode.LEFT,
+            VirtualKeyCode.RIGHT,
+            VirtualKeyCode.UP,
+            VirtualKeyCode.DOWN,
+
+            VirtualKeyCode.F3
+            ];
+        foreach (VirtualKeyCode code in codes)
+            Keys.Add((int)code, new KeyState((int)code));
     }
     [DllImport("user32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
     public static extern short GetKeyState(int nVirtKey);
@@ -117,5 +93,9 @@ public class KeyboardReader
     public static bool IsKeyDown(int nVirtKey){
         return GetKeyState(nVirtKey) < 0;
     }
-    
+
+    public void OnCloseProgram()
+    {
+
+    }
 }

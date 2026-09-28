@@ -1,10 +1,7 @@
 ﻿namespace MultiInput.Enums.Constants;
-
-
-
 public enum KeyStateChanged
 {
-    JustPressed,
-    JustReleased
+    JustPressed = 1,
+    JustReleased = 0
 }
 

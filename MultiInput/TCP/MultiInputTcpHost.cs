@@ -2,6 +2,8 @@
 using MultiInput.ControllerUtils;
 using MultiInput.Extensions;
 using MultiInput.Inputter;
+using MultiInput.Inputter.Controller;
+using MultiInput.Inputter.Controller.XInputController;
 using MultiInput.Logging;
 using MultiInput.Poller;
 using System.Net;
@@ -15,11 +17,14 @@ public partial class MultiInputTcp
     public class MultiInputTcpHost(TcpListener listener)
     {
         private ConfigurationFile config;
+        private IInputReader reader;
         public TcpListener Listener = listener;
-        private bool _restrictLogSpamming;
-        private bool _hasvibratedController;
         public static void InitializeHost(int port){
             StaticData.Host = new MultiInputTcpHost(TcpListener.Create(port));
+        }
+        public void OnCloseProgram()
+        {
+            reader.OnCloseProgram();
         }
 
         public void Awake(){
@@ -28,10 +33,10 @@ public partial class MultiInputTcp
             Listener.Start();
             switch (StaticData.InputType) {
                 case InputType.Keyboard:
-                    KeyboardReader.InitializeKeys();
+                    reader = new KeyboardReader();
                     break;
                 case InputType.Controller:
-                    ControllerReader.TryGetController();
+                    reader = new ControllerReader();
                     break;
             }
         }
@@ -50,14 +55,6 @@ public partial class MultiInputTcp
             if (StaticData.Clients.Count == 0) {
                 return;
             }
-            /*
-             * List<Socket> disconnectedSockets = new List<Socket>();
-                foreach (var client in StaticData.Clients) {
-                if (!client.Connected) {
-                    disconnectedSockets.Add(client);
-                }
-            }
-             */
 
             var disconnectedSockets = StaticData.Clients.Where(client => !client.Connected).ToList();
             
@@ -70,44 +67,7 @@ public partial class MultiInputTcp
                 TrySendToAll(Encoding.UTF8.GetBytes($"ping"));
             }
 
-            
-            switch (StaticData.InputType) {
-                case InputType.Keyboard:
-                    KeyboardReader.UpdateKeys(StaticData.Clients);
-                    break;
-                case InputType.Controller:
-                {
-                    if (StaticData.ControllerInputType == ControllerInputType.DualSense) {
-                        break;
-                    }
-                    int id = ControllerReader.XInput.GetFirstConnectedController();
-                    ControllerReader.TargettedControllerIndex = id;
-                    if (id is -1) {
-                        if (_restrictLogSpamming) {
-                            return;
-                        }
-
-                        _hasvibratedController = false;
-                        _restrictLogSpamming = true;
-                        ConsoleLog.WriteConsoleMessage($"No Controller Connected");
-                        DebugLog.DebugMessageThread($"No Controller Connected");
-                        return;
-                    }
-
-                    if (!_hasvibratedController) {
-                        _hasvibratedController = true;
-                        ControllerUtilities.CreateThreadedControllerVibrationStartup(ControllerInputType.XInput);
-                    }
-
-                    _restrictLogSpamming = false;
-                    ControllerReader.XInput.ReadAllButtons();
-                    break;
-                }
-                default:
-                    ConsoleLog.WriteConsoleMessage($"Error InputType is invalid ~~ {StaticData.InputType}",ConsoleColor.Red);
-                    DebugLog.WriteDebugMessage($"Error InputType is invalid ~~ {StaticData.InputType}");
-                    break;
-            }
+            reader.UpdateBindings(StaticData.Clients);
         }
 
         public bool PreConnect(){
