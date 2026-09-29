@@ -159,11 +159,10 @@ internal static class TcpServer
 
     private static bool OnCloseProgram(int eventType) {
         ConsoleLog.WriteConsoleMessage($"Closing Program...", ConsoleColor.Yellow);
-        KeyboardInput.ReleaseAll();
         DebugLog.CreatePreviousDebugLog();
         ConsoleLog.WriteConsoleMessage($"Program Closed at: {DateTime.Now}", ConsoleColor.Green);
-        StaticData.DualSense?.EndPolling();
-        StaticData.DualSense?.Release();
+        StaticData.Host?.OnCloseProgram();
+        StaticData.Client?.OnCloseProgram();
         return false;
     }
 

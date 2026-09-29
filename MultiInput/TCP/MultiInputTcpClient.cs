@@ -81,5 +81,10 @@ public partial class MultiInputTcp
             Client.Close();
             StaticData.Client = null;
         }
+
+        internal void OnCloseProgram()
+        {
+            KeyboardInput.ReleaseAll();
+        }
     }
 }

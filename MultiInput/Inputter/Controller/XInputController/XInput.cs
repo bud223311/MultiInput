@@ -1,149 +1,18 @@
-﻿using System.Runtime.InteropServices;
-using DualSenseAPI;
-using MultiInput.Extensions;
-using MultiInput.Logging;
-using MultiInput.TCP;
+﻿using System.Numerics;
+using System.Runtime.InteropServices;
 
-namespace MultiInput.Inputter;
-
-public static class ControllerReader
+namespace MultiInput.Inputter.Controller.XInputController
 {
-    public static int TargettedControllerIndex = -1;
-
-    public static void TryGetController(){
-        DualSense? dualSense = DualSense.EnumerateControllers().FirstOrDefault();
-        StaticData.DualSense = dualSense;
-    }
-    public class ButtonState
-    {
-        public static List<ButtonState> AllButtons = new List<ButtonState>();
-        public XInputButton Button;
-        public bool IsPressed;
-        public bool WasPressedLastFrame;
-        public ButtonState(XInputButton button){
-            Button = button;
-            IsPressed = false;
-
-            AllButtons.Add(this);
-        }
-
-        public void NotifyButtonStateChange()
-        {
-            SendButtonPacket(InputType.Controller, Button, held: IsPressed);
-        }
-
-        public static void SendButtonPacket(InputType inputType, XInputButton button, bool held)
-        {
-            // if (StaticData.Clients.Count is 0) {
-            //     return;
-            // }
-            DebugLog.DebugMessageThread($"KeyData | Key: {button} | State: {(held ? "On" : "Off")}\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".", StaticData.Clients.Select(x => x.RemoteEndPoint))}");
-
-            if (!StaticData.ToggleInput)
-            {
-                return;
-            }
-            byte[] data = $"{(int)inputType}.{button}.{(held ? 1 : 0)}".ToBytes();
-
-            MultiInputTcp.MultiInputTcpHost.TrySendToAll(data);
-        }
-    }
-	
-    public struct Vector2
-    {
-        public float x;
-        public float y;
-    }
-
-    public enum XInputButton : ushort
-    {
-        None = 0x0000,
-        DPadUp = 0x0001,
-        DPadDown = 0x0002,
-        DPadLeft = 0x0004,
-        DPadRight = 0x0008,
-        Start = 0x0010,
-        Back = 0x0020,
-        LeftThumb = 0x0040,
-        RightThumb = 0x0080,
-        LeftShoulder = 0x0100,
-        RightShoulder = 0x0200,
-        A = 0x1000,
-        B = 0x2000,
-        X = 0x4000,
-        Y = 0x8000
-    }
-
     public static class XInput
     {
         private const uint ERROR_SUCCESS = 0;
         private const uint ERROR_DEVICE_NOT_CONNECTED = 0x48F;
         private const int XUSER_MAX_COUNT = 4;
-        private const int BUTTON_COUNT = 16;
+        public const int BUTTON_COUNT = 16;
         private const int XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE = 7849;
         private const int XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE = 8689;
         private const int XINPUT_GAMEPAD_TRIGGER_THRESHOLD = 30;
         private const int STICK_MAXIMUM = 32767;
-
-        private class XInputState
-        {
-            public void CopyTo(XInputState target)
-            {
-                target.IsConnected = IsConnected;
-                target.PacketNumber = PacketNumber;			
-                target.Buttons = Buttons;
-                target.TriggerLeft = TriggerLeft;
-                target.TriggerRight = TriggerRight;
-                target.ThumbLeft = ThumbLeft;
-                target.ThumbRight = ThumbRight;
-                target.ThumbLeftRaw = ThumbLeftRaw;
-                target.ThumbRightRaw = ThumbRightRaw;
-            }
-
-            public void Reset()
-            {
-                IsConnected = false;
-                PacketNumber = 0;			
-                Buttons = 0;
-                TriggerLeft = 0.0f;
-                TriggerRight = 0.0f;
-                ThumbLeft = new Vector2();
-                ThumbRight = new Vector2();
-                ThumbLeftRaw = new Vector2();
-                ThumbRightRaw = new Vector2();
-            }
-
-
-            public bool IsConnected;
-            public uint PacketNumber;
-            public ushort Buttons;
-            public float TriggerLeft;
-            public float TriggerRight;
-            public Vector2 ThumbLeft;
-            public Vector2 ThumbRight;
-            public Vector2 ThumbLeftRaw;
-            public Vector2 ThumbRightRaw;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct XINPUT_STATE_GAMEPAD
-        {
-            public uint PacketNumber;
-            public ushort Buttons;
-            public byte LeftTrigger;
-            public byte RightTrigger;
-            public short ThumbLX;
-            public short ThumbLY;
-            public short ThumbRX;
-            public short ThumbRY;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct XINPUT_VIBRATION
-        {
-            public ushort LeftMotorSpeed;
-            public ushort RightMotorSpeed;
-        }
 
         private static XInputState[] mLastFrame;
         private static XInputState[] mThisFrame;
@@ -173,25 +42,6 @@ public static class ControllerReader
             if (!thisState.IsConnected) return false;
 
             return (thisState.Buttons & (ushort)button) != 0;
-        }
-        public static void InitializeButtons(){
-            for (int i = 0; i < BUTTON_COUNT; i++) {
-                int buttonindex = i;
-                XInputButton button = (XInputButton)(1 << buttonindex);
-                ButtonState buttonState = new ButtonState(button);
-            }
-        }
-
-        public static void ReadAllButtons(){
-            foreach (var buttonState in ButtonState.AllButtons) {
-                buttonState.IsPressed = GetButton((uint)TargettedControllerIndex, buttonState.Button);
-                
-                if (buttonState.IsPressed == !buttonState.WasPressedLastFrame){
-                    buttonState.NotifyButtonStateChange();
-                }
-                
-                buttonState.WasPressedLastFrame = buttonState.IsPressed;
-            }
         }
 
         /// <summary>
@@ -236,7 +86,8 @@ public static class ControllerReader
             return -1;
         }
 
-        public static int[] GetConnectedControllers(){
+        public static int[] GetConnectedControllers()
+        {
             int[] connectedControllers = new int[XUSER_MAX_COUNT];
             for (int i = 0; i < XUSER_MAX_COUNT; i++)
             {
@@ -316,8 +167,8 @@ public static class ControllerReader
             }
             else if (rawState.PacketNumber != thisState.PacketNumber)
             {
-                thisState.PacketNumber	= rawState.PacketNumber;
-                thisState.IsConnected	= true;			
+                thisState.PacketNumber = rawState.PacketNumber;
+                thisState.IsConnected = true;
 
                 //
                 // Buttons
@@ -354,15 +205,15 @@ public static class ControllerReader
                 thumbLMag = GetCircularDeadzone(thumbLMag, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, STICK_MAXIMUM);
                 thumbRMag = GetCircularDeadzone(thumbRMag, XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE, STICK_MAXIMUM);
 
-                thisState.ThumbLeft.x = thumbLXUnitRaw / thumbLMag;
-                thisState.ThumbLeft.y = thumbLYUnitRaw / thumbLMag;
-                thisState.ThumbRight.x = thumbRXUnitRaw / thumbRMag;
-                thisState.ThumbRight.y = thumbRYUnitRaw / thumbRMag;
+                thisState.ThumbLeft.X = thumbLXUnitRaw / thumbLMag;
+                thisState.ThumbLeft.Y = thumbLYUnitRaw / thumbLMag;
+                thisState.ThumbRight.X = thumbRXUnitRaw / thumbRMag;
+                thisState.ThumbRight.Y = thumbRYUnitRaw / thumbRMag;
 
-                thisState.ThumbLeftRaw.x = thumbLXUnitRaw;
-                thisState.ThumbLeftRaw.y = thumbLYUnitRaw;
-                thisState.ThumbRightRaw.x = thumbRXUnitRaw;
-                thisState.ThumbRightRaw.y = thumbRYUnitRaw;
+                thisState.ThumbLeftRaw.X = thumbLXUnitRaw;
+                thisState.ThumbLeftRaw.Y = thumbLYUnitRaw;
+                thisState.ThumbRightRaw.X = thumbRXUnitRaw;
+                thisState.ThumbRightRaw.Y = thumbRYUnitRaw;
             }
         }
 
