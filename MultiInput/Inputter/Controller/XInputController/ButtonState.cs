@@ -25,6 +25,7 @@ namespace MultiInput.Inputter.Controller.XInputController
             // if (StaticData.Clients.Count is 0) {
             //     return;
             // }
+            ConsoleLog.WriteConsoleMessage($"KeyData | Key: {button} | State: {(held ? "On" : "Off")}\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".", StaticData.Clients.Select(x => x.RemoteEndPoint))}");
             DebugLog.DebugMessageThread($"KeyData | Key: {button} | State: {(held ? "On" : "Off")}\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".", StaticData.Clients.Select(x => x.RemoteEndPoint))}");
 
             if (!StaticData.ToggleInput)

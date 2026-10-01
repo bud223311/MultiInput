@@ -16,7 +16,6 @@ public class ConfigurationFile
         if (!VerifyExists())
         {
             WriteFreshConfig();
-            return;
         }
 
         ReadConfig();
