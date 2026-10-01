@@ -60,7 +60,6 @@ public partial class MultiInputTcp
                 _keyboardInput.Handle(Encoding.UTF8.GetString(buffer), amount);
             }
             catch (SocketException e) {
-                ConsoleLog.WriteConsoleMessage($"Connection Ended. Disconnecting...");
                 DebugLog.WriteDebugMessage($"Connection Ended. Disconnecting...\nReason: {e.Message}");
                 OnDisconnect();
             }
@@ -76,8 +75,9 @@ public partial class MultiInputTcp
         }
 
         public void OnDisconnect(){
+            ConsoleLog.WriteConsoleMessage($"Disconnected from: {Client.Client.RemoteEndPoint}", ConsoleColor.Yellow);
             KeyboardInput.ReleaseAll();
-        
+            
             StaticData.WasDisconnected = true;
         
             StaticData.Client?.Close();
