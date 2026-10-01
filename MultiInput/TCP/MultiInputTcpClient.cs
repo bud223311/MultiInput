@@ -55,8 +55,14 @@ public partial class MultiInputTcp
                 if (amount is 0) {
                     return;
                 }
+
                 DebugLog.WriteDebugMessage($"Received {amount} of bytes");
-                _keyboardInput.Handle(Encoding.UTF8.GetString(buffer),amount);
+                _keyboardInput.Handle(Encoding.UTF8.GetString(buffer), amount);
+            }
+            catch (SocketException e) {
+                ConsoleLog.WriteConsoleMessage($"Connection Ended. Disconnecting...");
+                DebugLog.WriteDebugMessage($"Connection Ended. Disconnecting...\nReason: {e.Message}");
+                OnDisconnect();
             }
             catch (Exception e) {
                 ConsoleLog.WriteConsoleMessage($"An Error occured in TCP Client {e}");
