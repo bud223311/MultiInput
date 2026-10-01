@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using MultiInput.Configuration;
 using MultiInput.Enums.Constants;
 using WindowsInput.Native;
 
@@ -16,13 +17,13 @@ public class KeyboardReader : IInputReader
         InitializeKeys();
     }
 
-    public void UpdateBindings(List<Socket> connections){
+    public void UpdateBindings(List<Socket> connections,ConfigurationFile config){
         foreach (var key in Keys.Values) {
             
             bool newState = IsKeyDown(key.VKey);
             if (key.IsDown != newState) {
                 
-                key.OnKeyStateChange(newState ? KeyStateChanged.JustPressed : KeyStateChanged.JustReleased, connections);
+                key.OnKeyStateChange(newState ? KeyStateChanged.JustPressed : KeyStateChanged.JustReleased, connections,config);
             }
             key.IsDown = newState;
         }

@@ -66,7 +66,7 @@ public partial class MultiInputTcp
                 TrySendToAll(Encoding.UTF8.GetBytes($"ping"));
             }
 
-            reader.UpdateBindings(StaticData.Clients);
+            reader.UpdateBindings(StaticData.Clients,config);
         }
 
         public bool PreConnect(){

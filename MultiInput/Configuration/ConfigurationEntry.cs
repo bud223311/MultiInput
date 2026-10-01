@@ -6,6 +6,8 @@ namespace MultiInput.Configuration
 {
     public class ConfigurationEntry
     {
+        public static int KeyboardToggleKey;
+        public static SDL.GamepadButton ControllerToggleKey;
         public DataConfigurationHandlingType DataConfigHandlingType;
         public InputType InputType;
         public int? ReplacingKey;

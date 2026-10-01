@@ -23,6 +23,7 @@ public partial class MultiInputTcp
         }
         public void Awake(){
             config = new ConfigurationFile();
+            
             _lastconnectionstate = false;
             ConsoleLog.WriteConsoleMessage($"Connecting...", ConsoleColor.Yellow);
             try {
@@ -57,7 +58,7 @@ public partial class MultiInputTcp
                 }
 
                 DebugLog.WriteDebugMessage($"Received {amount} of bytes");
-                _keyboardInput.Handle(Encoding.UTF8.GetString(buffer), amount);
+                _keyboardInput.Handle(Encoding.UTF8.GetString(buffer), amount,config);
             }
             catch (SocketException e) {
                 DebugLog.WriteDebugMessage($"Connection Ended. Disconnecting...\nReason: {e.Message}");
@@ -73,6 +74,7 @@ public partial class MultiInputTcp
         public void OnConnect(EndPoint? clientRemoteEndPoint){
             ConsoleLog.WriteConsoleMessage($"Connected to: {clientRemoteEndPoint}", ConsoleColor.Green);
         }
+        
 
         public void OnDisconnect(){
             ConsoleLog.WriteConsoleMessage($"Disconnected from: {Client.Client.RemoteEndPoint}", ConsoleColor.Yellow);

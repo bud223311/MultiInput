@@ -1,3 +1,4 @@
+using MultiInput.Configuration;
 using MultiInput.Logging;
 using WindowsInput;
 using WindowsInput.Native;
@@ -10,7 +11,7 @@ public class KeyboardInput
     private static InputSimulator _inputSimulator = new InputSimulator();
     private static List<int> _pressedKeys = new List<int>();
 
-    public void Handle(string data,int count){
+    public void Handle(string data,int count,ConfigurationFile config){
         DebugLog.WriteDebugMessage($"Received: {data}");
         if (count > 3) {
             
@@ -28,12 +29,19 @@ public class KeyboardInput
                         DebugLog.WriteDebugMessage($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| Failed To Parse Key. DATA:{data}");
                         return;
                     }
-               
-                    SendKeyStroke(fKeyInt, validData.State);
+                    ConfigurationEntry? configurationEntry = config.ClientConfigs.FirstOrDefault(x => x.ReplacingKey != null &&
+                        x.ReplacingKey == fKeyInt);
+        
+                    if (configurationEntry is null) {
+                        DebugLog.DebugMessageThread($"No configuration found for Keyboard button: {fKeyInt}");
+                        return;
+                    }
+                    
+                    SendKeyStroke(configurationEntry.ReplacedKey, validData.State);
                     return;
                 }
                 case InputType.Controller:
-                    HandlerUtils.HandleController(validData);
+                    HandlerUtils.HandleController(validData, config);
                     break;
             }
         }

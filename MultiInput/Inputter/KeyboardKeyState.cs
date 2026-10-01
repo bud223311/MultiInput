@@ -3,6 +3,8 @@ using MultiInput.Logging;
 using MultiInput.TCP;
 using System.Net.Sockets;
 using System.Text;
+using MultiInput.Configuration;
+using SDL3;
 using WindowsInput.Native;
 
 namespace MultiInput.Inputter
@@ -17,10 +19,10 @@ namespace MultiInput.Inputter
             VKey = vKey;
         }
 
-        public void OnKeyStateChange(KeyStateChanged ev, List<Socket> clients)
+        public void OnKeyStateChange(KeyStateChanged ev, List<Socket> clients,ConfigurationFile config)
         {
             DebugLog.DebugMessageThread($"KeyData | Key: {VKey} | State: {ev}\nStaticData | InputLock:{StaticData.ToggleInput} | {string.Join(".", StaticData.Clients.Select(x => x.RemoteEndPoint))}");
-            if (this.VKey == (int)VirtualKeyCode.F3)
+            if (this.VKey == ConfigurationEntry.KeyboardToggleKey)
             {
                 if (ev == KeyStateChanged.JustPressed)
                 {
@@ -37,7 +39,16 @@ namespace MultiInput.Inputter
             {
                 return;
             }
-            string data = $"{VKey}.{ev.ToString("D")}";
+            ConfigurationEntry? configurationEntry = config.HostConfigs.FirstOrDefault(x =>
+                x.ReplacingKey != null && x.ReplacingKey == VKey);
+
+            if (configurationEntry is null) {
+                DebugLog.DebugMessageThread($"No configuration found for Keyboard button: {VKey}");
+                return;
+            }
+
+
+            string data = $"{configurationEntry.ReplacedKey}.{ev.ToString("D")}";
             var span = Encoding.UTF8.GetBytes($"0.{data}");
 
             Console.WriteLine($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}| SEND {data}");

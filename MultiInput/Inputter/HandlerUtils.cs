@@ -1,4 +1,6 @@
-﻿using MultiInput.Logging;
+﻿using MultiInput.Configuration;
+using MultiInput.Logging;
+using SDL3;
 using WindowsInput.Native;
 
 namespace MultiInput.Inputter;
@@ -43,46 +45,19 @@ public static class HandlerUtils
         return parsedData is not null;
     }
 
-    public static void HandleController(Data data){
-        switch (data.Key) {
-            /*case $"South":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.SPACE, fState);
-                break;
-            case $"East":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.LCONTROL, fState);
-                break;
-            case $"West":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.VK_F, fState);
-                break;
-            case $"North":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.VK_V, fState);
-                break;
-            case $"LeftShoulder":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.VK_Q, fState);
-                break;
-            case $"RightShoulder":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.VK_E, fState);
-                break;
-            case $"DPadUp":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.UP, fState);
-                break;
-            case $"DPadDown":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.DOWN, fState);
-                break;
-            */case $"DPadLeft":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.VK_F, data.State);
-                break;/*
-            case $"DPadRight":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.RIGHT, fState);
-                break;
-            case $"Start":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.RETURN, fState);
-                break;
-            case $"Back":
-                KeyboardInput.SendKeyStroke((int)VirtualKeyCode.ESCAPE, fState);
-                break;*/
-            default:
-                break;
+    public static void HandleController(Data data,ConfigurationFile config){
+
+        if (SDL.GamepadButton.TryParse(data.Key, out SDL.GamepadButton button)) {
+            DebugLog.DebugMessageThread($"Failed to parse controller button: {data.Key}");
+            return;
         }
+        ConfigurationEntry? configurationEntry = config.ClientConfigs.FirstOrDefault(x => x.ReplacingControllerKey != null &&
+                                                                                    x.ReplacingControllerKey == button);
+        
+        if (configurationEntry is null) {
+            DebugLog.DebugMessageThread($"No configuration found for controller button: {data.Key}");
+            return;
+        }
+        KeyboardInput.SendKeyStroke(configurationEntry.ReplacedKey, data.State);
     }
 }
