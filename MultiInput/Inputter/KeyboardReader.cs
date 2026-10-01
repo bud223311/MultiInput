@@ -7,7 +7,7 @@ namespace MultiInput.Inputter;
 
 public class KeyboardReader : IInputReader
 {
-    public Dictionary<int, KeyState> Keys = new Dictionary<int, KeyState>();
+    public Dictionary<int, KeyboardKeyState> Keys = new Dictionary<int, KeyboardKeyState>();
     public int VKey;
     public bool IsDown;
 
@@ -28,7 +28,7 @@ public class KeyboardReader : IInputReader
         }
     }
 
-    public KeyState? GetKeyByVKey(int key){
+    public KeyboardKeyState? GetKeyByVKey(int key){
         return Keys.FirstOrDefault(x=>x.Key == key).Value;
     }
     public void InitializeKeys(){
@@ -85,7 +85,7 @@ public class KeyboardReader : IInputReader
             VirtualKeyCode.F3
             ];
         foreach (VirtualKeyCode code in codes)
-            Keys.Add((int)code, new KeyState((int)code));
+            Keys.Add((int)code, new KeyboardKeyState((int)code));
     }
     [DllImport("user32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
     public static extern short GetKeyState(int nVirtKey);

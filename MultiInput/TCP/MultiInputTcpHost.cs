@@ -3,7 +3,6 @@ using MultiInput.ControllerUtils;
 using MultiInput.Extensions;
 using MultiInput.Inputter;
 using MultiInput.Inputter.Controller;
-using MultiInput.Inputter.Controller.XInputController;
 using MultiInput.Logging;
 using MultiInput.Poller;
 using System.Net;

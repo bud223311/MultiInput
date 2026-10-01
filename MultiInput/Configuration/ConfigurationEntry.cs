@@ -1,5 +1,6 @@
-﻿using MultiInput.Inputter.Controller.XInputController;
+﻿
 using MultiInput.Logging;
+using SDL3;
 
 namespace MultiInput.Configuration
 {
@@ -8,7 +9,7 @@ namespace MultiInput.Configuration
         public DataConfigurationHandlingType DataConfigHandlingType;
         public InputType InputType;
         public int? ReplacingKey;
-        public XInputButton? ReplacingControllerKey;
+        public SDL.GamepadButton? ReplacingControllerKey;
         public int ReplacedKey;
         public int Key;
         const int HANDLING_TYPE_INDEX = 0;
@@ -52,7 +53,7 @@ namespace MultiInput.Configuration
                     }
                 case InputType.Controller:
                     {
-                        bool result = XInputButton.TryParse(input, ignoreCase: true, out XInputButton controllerBinding);
+                        bool result = Enum.TryParse(input, ignoreCase: true, out SDL.GamepadButton controllerBinding);
                         binding = controllerBinding;
                         return result;
                     }
@@ -117,7 +118,7 @@ namespace MultiInput.Configuration
                                     }
                                 case InputType.Controller:
                                     {
-                                        ReplacingControllerKey = (XInputButton)binding;
+                                        ReplacingControllerKey = (SDL.GamepadButton)binding;
                                         break;
                                     }
                             }

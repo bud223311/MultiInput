@@ -45,16 +45,16 @@ public static class HandlerUtils
 
     public static void HandleController(Data data){
         switch (data.Key) {
-            /*case $"A":
+            /*case $"South":
                 KeyboardInput.SendKeyStroke((int)VirtualKeyCode.SPACE, fState);
                 break;
-            case $"B":
+            case $"East":
                 KeyboardInput.SendKeyStroke((int)VirtualKeyCode.LCONTROL, fState);
                 break;
-            case $"X":
+            case $"West":
                 KeyboardInput.SendKeyStroke((int)VirtualKeyCode.VK_F, fState);
                 break;
-            case $"Y":
+            case $"North":
                 KeyboardInput.SendKeyStroke((int)VirtualKeyCode.VK_V, fState);
                 break;
             case $"LeftShoulder":

@@ -4,6 +4,7 @@ using MultiInput.Extensions;
 using MultiInput.Inputter;
 using MultiInput.Logging;
 using MultiInput.TCP;
+using SDL3;
 
 namespace MultiInput;
 
@@ -178,6 +179,9 @@ internal static class TcpServer
     }
 
     public static void OnStartup(){
+        SDL.Init(SDL.InitFlags.Gamepad);
+        //Disable Automatic Processing of Controller
+        SDL.SetGamepadEventsEnabled(false);
         InitializeHandler();
         DebugLog.InitializeStartup();
     }

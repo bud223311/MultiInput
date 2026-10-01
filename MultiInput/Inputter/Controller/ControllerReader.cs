@@ -1,136 +1,93 @@
-﻿using DualSenseAPI;
-using DualSenseAPI.State;
+﻿
 using MultiInput.ControllerUtils;
-using MultiInput.Inputter.Controller.XInputController;
 using MultiInput.Logging;
 using MultiInput.Timer;
 using System.Net.Sockets;
+using MultiInput.Enums.Constants;
+using SDL3;
+
 namespace MultiInput.Inputter.Controller;
 
 public class ControllerReader : IInputReader
 {
-    public List<ButtonState> AllButtons = new List<ButtonState>();
-    public int TargettedControllerIndex = -1;
-    internal ControllerInputType ControllerInputType;
+    public Dictionary<int, ControllerKeyState> Keys = new Dictionary<int, ControllerKeyState>();
+
+    public IntPtr TargettedControllerIndex;
     private bool _restrictLogSpamming;
     private bool _hasvibratedController;
-    internal DualSense? DualSense
-    {
-        get;
-        set
-        {
-            if (value is null)
-            {
-                ControllerInputType = ControllerInputType.XInput;
-                InitializeButtons();
-                field = null;
-                return;
-            }
-            field = value;
-            field.Acquire();
-            field.OnButtonStateChanged += OnDualShockControllerStateChange;
-            field.BeginPolling(20);
-            field.OutputState.LeftRumble = 1f;
-            field.OutputState.RightRumble = 1f;
-            WaitingTimer.WaitForMilliseconds(500);
-            field.OutputState.LeftRumble = 0f;
-            field.OutputState.RightRumble = 0f;
-            ControllerInputType = ControllerInputType.DualSense;
-        }
-    }
+    
 
     public ControllerReader()
     {
+        InitializeButtons();
         _hasvibratedController = false;
         _restrictLogSpamming = false;
-        TargettedControllerIndex = -1;
+        TargettedControllerIndex = IntPtr.Zero;
         TryGetController();
     }
 
-    public void TryGetController(){
-        DualSense? dualSense = DualSense.EnumerateControllers().FirstOrDefault();
-        DualSense = dualSense;
-    }
-
-    private static void OnDualShockControllerStateChange(DualSense sender, DualSenseInputStateButtonDelta changes)
-    {
-        if (!changes.HasChanges) return;
-        OnDualShockControllerButtonState(changes.DPadLeftButton, XInputButton.DPadLeft);
-    }
-
-    private static void OnDualShockControllerButtonState(ButtonDeltaState delta, XInputButton button)
-    {
-        switch (delta)
-        {
-            case ButtonDeltaState.Pressed:
-                ButtonState.SendButtonPacket(InputType.Controller, button, held: true);
-                break;
-            case ButtonDeltaState.Released:
-                ButtonState.SendButtonPacket(InputType.Controller, button, held: false);
-                break;
-        }
-    }
-
-    public void InitializeButtons()
-    {
-        for (int i = 0; i < XInput.BUTTON_COUNT; i++)
-        {
-            int buttonindex = i;
-            XInputButton button = (XInputButton)(1 << buttonindex);
-            ButtonState buttonState = new ButtonState(button);
-            AllButtons.Add(buttonState);
-        }
-    }
-
-    public void ReadAllButtons(int targettedControllerIndex)
-    {
-        foreach (var buttonState in AllButtons)
-        {
-            buttonState.IsPressed = XInput.GetButton((uint)targettedControllerIndex, buttonState.Button);
-
-            if (buttonState.IsPressed == !buttonState.WasPressedLastFrame)
-            {
-                buttonState.NotifyButtonStateChange();
+    public void ReadSdlController(List<Socket> connections){
+        SDL.UpdateGamepads();
+        foreach (var key in Keys) {
+            bool newState =SDL.GetGamepadButton(TargettedControllerIndex, key.Value.GamepadButton);
+            // Update the key state based on the SDL button state
+            if (key.Value.IsDown != newState) {
+                key.Value.OnKeyStateChange(newState ? KeyStateChanged.JustPressed : KeyStateChanged.JustReleased, connections);
             }
-
-            buttonState.WasPressedLastFrame = buttonState.IsPressed;
+            key.Value.IsDown = newState;
         }
     }
-    public void UpdateBindings(List<Socket> connections)
-    {
-        if (ControllerInputType == ControllerInputType.DualSense)
-        {
-            return;
-        }
-        int id = XInput.GetFirstConnectedController();
-        TargettedControllerIndex = id;
-        if (id is -1)
-        {
-            if (_restrictLogSpamming)
-            {
-                return;
-            }
 
+    
+
+    public void InitializeButtons(){
+        SDL.GamepadButton[] buttons = Enum.GetValues<SDL.GamepadButton>();
+        foreach (SDL.GamepadButton button in buttons)
+            Keys.Add((int)button, new ControllerKeyState(button));
+    }
+    
+    
+    
+
+    public IntPtr? TryGetController(){
+        uint? gamepadId = SDL.GetGamepads(out int count)?.FirstOrDefault();
+        if (gamepadId is null) {
+            return null;
+        }
+        
+        IntPtr sdlGamePadId = SDL.GetGamepadFromID((uint)gamepadId);
+        if (sdlGamePadId == IntPtr.Zero) {
+            sdlGamePadId = SDL.OpenGamepad((uint)gamepadId);
+        }
+
+        return sdlGamePadId;
+    }
+
+
+    public void UpdateBindings(List<Socket> connections){
+        IntPtr? sdlGamePadId = TryGetController();
+        if (sdlGamePadId is null) {
+            TargettedControllerIndex = IntPtr.Zero;
+            if (!_restrictLogSpamming) {
+                DebugLog.DebugMessageThread($"No Controller Found");
+                ConsoleLog.WriteConsoleMessage($"No Controller Found");
+                _restrictLogSpamming = true;
+            }
             _hasvibratedController = false;
-            _restrictLogSpamming = true;
-            ConsoleLog.WriteConsoleMessage($"No Controller Connected");
-            DebugLog.DebugMessageThread($"No Controller Connected");
             return;
         }
 
-        if (!_hasvibratedController)
-        {
+        if (!_hasvibratedController) {
+            ControllerUtilities.CreateThreadedControllerVibrationStartup((IntPtr)sdlGamePadId);
             _hasvibratedController = true;
-            ControllerUtilities.CreateThreadedControllerVibrationStartup(ControllerInputType.XInput, DualSense, TargettedControllerIndex);
         }
-
-        _restrictLogSpamming = false;
-        ReadAllButtons(TargettedControllerIndex);
+        TargettedControllerIndex = (IntPtr)sdlGamePadId;
+        ReadSdlController(connections);
+        
     }
 
     public void OnCloseProgram()
     {
-        DualSense?.EndPolling();
-        DualSense?.Release();
+        SDL.CloseGamepad(TargettedControllerIndex);
     }
 }

@@ -1,7 +1,4 @@
-﻿using DualSenseAPI;
-using DualSenseAPI.State;
-using MultiInput.Inputter.Controller.XInputController;
-using MultiInput.TCP;
+﻿using MultiInput.TCP;
 using System.Net.Sockets;
 
 namespace MultiInput;
@@ -26,7 +23,6 @@ public enum InputType
 public enum ControllerInputType
 {
     XInput,
-    DualSense
 }
 
 public class Data(InputType inputType, string key, int state)

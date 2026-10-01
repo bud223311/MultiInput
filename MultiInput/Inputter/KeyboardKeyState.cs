@@ -7,12 +7,12 @@ using WindowsInput.Native;
 
 namespace MultiInput.Inputter
 {
-    public class KeyState
+    public class KeyboardKeyState
     {
         public int VKey;
         public bool IsDown;
 
-        public KeyState(int vKey)
+        public KeyboardKeyState(int vKey)
         {
             VKey = vKey;
         }
